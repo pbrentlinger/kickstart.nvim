@@ -242,6 +242,6 @@ return {
       })
 
       -- vim.cmd([[nnoremap \ :Neotree reveal<cr>]])
-      vim.cmd([[nnoremap \ :Neotree toggle<cr>]])
+      vim.cmd([[nnoremap \ :Neotree toggle reveal_force_cwd<cr>]])
     end
 }

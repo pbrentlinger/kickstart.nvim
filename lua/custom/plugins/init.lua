@@ -10,4 +10,5 @@ vim.o.t_Co = 256
 return {
 	'phelipetls/vim-hugo',
 	'tpope/vim-unimpaired',
+	'tpope/vim-surround',
 }
