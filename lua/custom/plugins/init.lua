@@ -11,4 +11,5 @@ return {
 	'phelipetls/vim-hugo',
 	'tpope/vim-unimpaired',
 	'tpope/vim-surround',
+	'tpope/vim-repeat',
 }
