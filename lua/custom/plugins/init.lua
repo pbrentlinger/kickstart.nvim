@@ -4,5 +4,10 @@
 -- See the kickstart.nvim README for more information
 
 vim.wo.relativenumber = true
+vim.o.termguicolors = true
+vim.o.t_Co = 256
 
-return {}
+return {
+	'phelipetls/vim-hugo',
+	'tpope/vim-unimpaired',
+}
