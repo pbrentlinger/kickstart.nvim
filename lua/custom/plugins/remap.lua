@@ -46,4 +46,29 @@ return {
 	-- makes script executable
 	vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true }),
 
+	-- terminal mode remaps --
+	-- exit terminal mode going to normal-terminal mode
+	vim.keymap.set("t", "<Esc>", "<C-\\><C-n>"),
+	vim.keymap.set("t", "<C-c>", "<C-\\><C-n>"),
+	vim.keymap.set("t", "<C-[>", "<C-\\><C-n>"),
+	vim.keymap.set("t", "<A-[>", "<Esc>"),
+
+	-- clear terminal
+	vim.api.nvim_set_keymap('t', '<C-l>', '<C-\\><C-n>:clear<CR>', { noremap = true }),
+	vim.api.nvim_set_keymap('n', '<C-l>', ':clear<CR>', { noremap = true }),
+
+	-- move between windows 
+	vim.keymap.set("n", "<A-h>", "<C-w>h"),
+	vim.keymap.set("n", "<A-j>", "<C-w>j"),
+	vim.keymap.set("n", "<A-k>", "<C-w>k"),
+	vim.keymap.set("n", "<A-l>", "<C-w>l"),
+	vim.keymap.set("t", "<A-h>", "<C-\\><C-n><C-w>h"),
+	vim.keymap.set("t", "<A-j>", "<C-\\><C-n><C-w>j"),
+	vim.keymap.set("t", "<A-k>", "<C-\\><C-n><C-w>k"),
+	vim.keymap.set("t", "<A-l>", "<C-\\><C-n><C-w>l"),
+	vim.keymap.set("i", "<A-h>", "<C-\\><C-n><C-w>h"),
+	vim.keymap.set("i", "<A-j>", "<C-\\><C-n><C-w>j"),
+	vim.keymap.set("i", "<A-k>", "<C-\\><C-n><C-w>k"),
+	vim.keymap.set("i", "<A-l>", "<C-\\><C-n><C-w>l"),
+
 }
