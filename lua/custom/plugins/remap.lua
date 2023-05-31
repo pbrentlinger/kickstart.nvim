@@ -27,7 +27,7 @@ return {
 	vim.keymap.set("i", "<C-c>", "<Esc>"),
 	vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>"),
 	vim.keymap.set("n", "<C-s>", ":w<CR>"),
-	vim.keymap.set("v", "<C-s>", "<Esc>:w<CR>"),
+	-- vim.keymap.set("v", "<C-s>", "<Esc>:w<CR>"),
 	-- Nope we don't want to record, thanks
 	vim.keymap.set("n", "Q", "<nop>"),
 
