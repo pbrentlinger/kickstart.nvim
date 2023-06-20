@@ -33,7 +33,7 @@ return {
 
 
 	-- vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
-
+	vim.keymap.set("n", "<leader><CR>", "i<CR><Esc>"),
 
 	vim.keymap.set("n", "<leader>f", vim.lsp.buf.format),
 
@@ -60,7 +60,7 @@ return {
 	vim.api.nvim_set_keymap('t', '<C-l>', '<C-\\><C-n>:clear<CR>', { noremap = true }),
 	vim.api.nvim_set_keymap('n', '<C-l>', ':clear<CR>', { noremap = true }),
 
-	-- move between windows 
+	-- move between windows
 	vim.keymap.set("n", "<A-h>", "<C-w>h"),
 	vim.keymap.set("n", "<A-j>", "<C-w>j"),
 	vim.keymap.set("n", "<A-k>", "<C-w>k"),
