@@ -201,6 +201,13 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+vim.keymap.set('n', '<Up>', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', '<Down>', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+-- TODO: Make this smooth
+-- vim.keymap.set('i', '<Up>', "v:count == 0 ? '<Esc>gki' : '<Esc>ki'", { expr = true, silent = true })
+-- vim.keymap.set('i', '<Down>', "v:count == 0 ? '<Esc>gji' : '<Esc>ji'", { expr = true, silent = true })
+  vim.keymap.set('i', '<Up>', "<Esc>gki" )
+  vim.keymap.set('i', '<Down>', "<Esc>gji" )
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
