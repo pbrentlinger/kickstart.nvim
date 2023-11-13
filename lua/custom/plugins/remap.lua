@@ -8,10 +8,10 @@ return {
 	-- with half page jumps cursor stays in middle of screen
 	vim.keymap.set("n", "<C-d>", "<C-d>zz"),
 	vim.keymap.set("n", "<C-u>", "<C-u>zz"),
-  vim.keymap.set("n", "<S-PageDown>", "<C-d>zz"),
-  vim.keymap.set("n", "<S-PageUp>", "<C-u>zz"),
+	vim.keymap.set("n", "<S-PageDown>", "<C-d>zz"),
+	vim.keymap.set("n", "<S-PageUp>", "<C-u>zz"),
 
-  -- search terms stay in the middle of the sceen.
+	-- search terms stay in the middle of the sceen.
 	vim.keymap.set("n", "n", "nzzzv"),
 	vim.keymap.set("n", "N", "Nzzzv"),
 
@@ -28,8 +28,8 @@ return {
 
 	-- This is going to get me cancelled
 	vim.keymap.set("i", "<C-c>", "<Esc>"),
-  -- Make saving faster...
-  vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>"),
+	-- Make saving faster...
+	vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>"),
 	vim.keymap.set("n", "<C-s>", ":w<CR>"),
 	-- vim.keymap.set("v", "<C-s>", "<Esc>:w<CR>"),
 
@@ -80,8 +80,8 @@ return {
 	vim.keymap.set("i", "<A-l>", "<C-\\><C-n><C-w>l"),
 
 	-- make <Shift-Home> and <Shift-End> be visual select to home/End
-  vim.keymap.set("n", "<S-Home>", "v0"),
-  vim.keymap.set("n", "<S-End>", "v$"),
-  vim.keymap.set("i", "<S-Home>", "<Esc>v0"),
-  vim.keymap.set("i", "<S-End>", "<Esc>v$"),
+	vim.keymap.set("n", "<S-Home>", "v0"),
+	vim.keymap.set("n", "<S-End>", "v$"),
+	vim.keymap.set("i", "<S-Home>", "<Esc>v0"),
+	vim.keymap.set("i", "<S-End>", "<Esc>v$"),
 }
