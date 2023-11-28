@@ -1,3 +1,7 @@
+if vim.g.vscode then
+    -- VSCode extension
+else
+    -- ordinary Neovim
 return {
     'glacambre/firenvim',
 
@@ -8,4 +12,4 @@ return {
         vim.fn["firenvim#install"](0)
     end
 }
-
+end

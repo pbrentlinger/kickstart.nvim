@@ -463,5 +463,37 @@ cmp.setup {
   },
 }
 
+-- Function to display the tabline
+function MyTabline()
+    local tabline = ''
+    local current_tab = vim.fn.tabpagenr()
+
+    for t = 1, vim.fn.tabpagenr('$') do
+        local tab_page = '%#TabLine#'
+        if t == current_tab then
+            tab_page = '%#TabLineSel#'
+        end
+
+        local tab_name = ' ' .. t .. ' '
+        local win_number = vim.fn.tabpagewinnr(t)
+        if win_number ~= -1 then
+            local bufnr = vim.fn.tabpagebuflist(t)[win_number]
+            local bufname = vim.fn.fnamemodify(vim.fn.bufname(bufnr), ':t')
+            if bufname == '' then
+                bufname = '[No Name]'
+            end
+            tab_name = tab_name .. bufname .. ' '
+        end
+
+        tabline = tabline .. tab_page .. tab_name
+    end
+
+    return tabline .. '%#TabLineFill#%T'
+end
+
+-- Set tabline as a custom statusline
+vim.o.showtabline = 2
+vim.o.tabline = '%!v:lua.MyTabline()'
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
