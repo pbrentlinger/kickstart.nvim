@@ -465,7 +465,11 @@ cmp.setup {
 
 -- Function to display the tabline
 function MyTabline()
-    local tabline = ''
+  if vim.fn.tabpagenr('$') <= 1 then
+    return ''
+  end
+
+  local tabline = ''
     local current_tab = vim.fn.tabpagenr()
 
     for t = 1, vim.fn.tabpagenr('$') do
@@ -492,8 +496,37 @@ function MyTabline()
 end
 
 -- Set tabline as a custom statusline
-vim.o.showtabline = 2
+vim.o.showtabline = 1
 vim.o.tabline = '%!v:lua.MyTabline()'
+
+
+-- Function to close all tabs to the right of the current tab
+function CloseTabsToRight()
+    local current_tab = vim.fn.tabpagenr()
+
+    for t = vim.fn.tabpagenr('$'), current_tab + 1, -1 do
+        vim.cmd(t .. 'tabclose')
+    end
+end
+
+-- Function to close all tabs to the left of the current tab
+function CloseTabsToLeft()
+    local current_tab = vim.fn.tabpagenr()
+
+    for t = current_tab - 1, 1, -1 do
+        vim.cmd(t .. 'tabclose')
+    end
+end
+
+---------------------------
+--- Tabpage keybindings ---
+---------------------------
+vim.api.nvim_set_keymap('n', '<leader>tt', ':tabnew<CR>', { noremap = true, silent = true, desc = 'New Tab' })
+-- Map a key combination to invoke the CloseTabsToLeft function
+vim.api.nvim_set_keymap('n', '<leader>tcl', ':lua CloseTabsToLeft()<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Left' })
+-- Map a key combination to invoke the CloseTabsToRight function
+vim.api.nvim_set_keymap('n', '<leader>tcr', ':lua CloseTabsToRight()<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Right' })
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

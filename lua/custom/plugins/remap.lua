@@ -85,7 +85,7 @@ return {
 	vim.keymap.set("i", "<S-Home>", "<Esc>v0"),
 	vim.keymap.set("i", "<S-End>", "<Esc>v$"),
 
+
 	-- tab navigation
-	vim.keymap.set("n", "<leader>t", ":tabnew<CR>"),
 
 }
