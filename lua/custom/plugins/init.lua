@@ -26,10 +26,10 @@ if vim.g.vscode then
 else
     -- ordinary Neovim
   return {
-    'phelipetls/vim-hugo',
-    'tpope/vim-unimpaired',
-    'tpope/vim-surround',
-    'tpope/vim-repeat',
-    'leafOfTree/vim-matchtag',
+    'phelipetls/vim-hugo', -- HUGO syntax
+    'tpope/vim-unimpaired', -- pairs of handy bracket mappings
+    'tpope/vim-surround', -- quoting/parenthesizing made simple
+    'tpope/vim-repeat', -- enable repeating supported plugin maps with .
+    'leafOfTree/vim-matchtag', -- highlight matching tags
   }
 end
