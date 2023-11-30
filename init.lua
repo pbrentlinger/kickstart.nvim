@@ -561,6 +561,7 @@ vim.api.nvim_set_keymap('n', '<leader>tt', ':tabnew<CR>', { noremap = true, sile
 vim.api.nvim_set_keymap('n', '<leader>tcl', ':lua CloseTabsToLeft()<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Left' })
 -- Map a key combination to invoke the CloseTabsToRight function
 vim.api.nvim_set_keymap('n', '<leader>tcr', ':lua CloseTabsToRight()<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Right' })
+vim.api.nvim_set_keymap('n', '<leader>tcc', ':tabclose<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Right' })
 -- Map to move tab positon by n where n can be a positive or negative number meaning to the right or left respectively
 vim.api.nvim_set_keymap('n', '<leader>tmr', ':<C-u>lua MoveTabWrapper(true)<CR>', { noremap = true, silent = true, desc = 'Move Tab [n] times right' })
 vim.api.nvim_set_keymap('n', '<leader>tml', ':<C-u>lua MoveTabWrapper(false)<CR>', { noremap = true, silent = true, desc = 'Move Tab [n] times left' })
