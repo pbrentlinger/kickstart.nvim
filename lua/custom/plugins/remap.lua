@@ -85,7 +85,9 @@ return {
 	vim.keymap.set("i", "<S-Home>", "<Esc>v0"),
 	vim.keymap.set("i", "<S-End>", "<Esc>v$"),
 
+	-- tabpage navigation found in /init.lua
 
-	-- tab navigation
-
+  -- Neotree keymaps
+  -- vim.cmd([[nnoremap \ :Neotree toggle reveal_force_cwd<cr>]]),
+	vim.cmd([[nnoremap <leader>\ :Neotree git_status<cr>]]),
 }
