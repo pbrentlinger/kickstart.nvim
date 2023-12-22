@@ -20,6 +20,15 @@ vim.o.tabstop = 2
 vim.o.shiftwidth = 2
 vim.o.expandtab = true
 
+-- Set local foldmethod to 'indent'
+vim.api.nvim_command('setlocal foldmethod=indent')
+-- Disable folding
+vim.api.nvim_command('setlocal nofoldenable')
+-- Set foldlevel to 99
+vim.api.nvim_command('setlocal foldlevel=99')
+vim.api.nvim_command('setlocal foldminlines=2')
+vim.api.nvim_command('setlocal foldnestmax=2')
+
 -- utility plugins
 if vim.g.vscode then
     -- VSCode extension
