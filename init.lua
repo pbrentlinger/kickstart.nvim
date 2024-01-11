@@ -566,5 +566,6 @@ vim.api.nvim_set_keymap('n', '<leader>tcc', ':tabclose<CR>', { noremap = true, s
 vim.api.nvim_set_keymap('n', '<leader>tmr', ':<C-u>lua MoveTabWrapper(true)<CR>', { noremap = true, silent = true, desc = 'Move Tab [n] times right' })
 vim.api.nvim_set_keymap('n', '<leader>tml', ':<C-u>lua MoveTabWrapper(false)<CR>', { noremap = true, silent = true, desc = 'Move Tab [n] times left' })
 vim.api.nvim_set_keymap('n', '<leader>to', ':tabo', { noremap = true, silent = true, desc = 'Close all other tabs' })
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- v m: ts=2 sts=2 sw=2 et
