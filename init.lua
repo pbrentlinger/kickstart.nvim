@@ -54,7 +54,6 @@ require('lazy').setup({
       'folke/neodev.nvim',
     },
   },
-
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
@@ -265,7 +264,7 @@ require('nvim-treesitter.configs').setup {
   auto_install = true,
 
   highlight = { enable = true },
-  indent = { enable = true, disable = { 'python' } },
+  indent = { enable = true },
   incremental_selection = {
     enable = true,
     keymaps = {
