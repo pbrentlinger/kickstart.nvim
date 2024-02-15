@@ -566,5 +566,11 @@ vim.api.nvim_set_keymap('n', '<leader>tmr', ':<C-u>lua MoveTabWrapper(true)<CR>'
 vim.api.nvim_set_keymap('n', '<leader>tml', ':<C-u>lua MoveTabWrapper(false)<CR>', { noremap = true, silent = true, desc = 'Move Tab [n] times left' })
 vim.api.nvim_set_keymap('n', '<leader>to', ':tabo', { noremap = true, silent = true, desc = 'Close all other tabs' })
 
+-- Move current tab to the right using Shift + Ctrl + PageDown
+vim.api.nvim_set_keymap('n', '<S-C-PageDown>', ':tabm +1<CR>', {noremap = true, silent = true})
+-- Move current tab to the left using Shift + Ctrl + PageUp
+vim.api.nvim_set_keymap('n', '<S-C-PageUp>', ':tabm -1<CR>', {noremap = true, silent = true})
+
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- v m: ts=2 sts=2 sw=2 et
