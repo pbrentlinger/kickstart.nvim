@@ -125,7 +125,6 @@ require('lazy').setup({
       return vim.fn.executable 'make' == 1
     end,
   },
-
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
@@ -232,6 +231,39 @@ require('telescope').setup {
     },
   },
 }
+
+-- Enable zoxide in telescope
+local t = require("telescope")
+local z_utils = require("telescope._extensions.zoxide.utils")
+
+-- Configure the extension
+t.setup({
+  extensions = {
+    zoxide = {
+      prompt_title = "[ Walking on the shoulders of TJ ]",
+      mappings = {
+        default = {
+          after_action = function(selection)
+            print("Update to (" .. selection.z_score .. ") " .. selection.path)
+          end
+        },
+        ["<C-s>"] = {
+          before_action = function(selection) print("before C-s") end,
+          action = function(selection)
+            vim.cmd.edit(selection.path)
+          end
+        },
+        ["<C-q>"] = { action = z_utils.create_basic_command("split") },
+      },
+    },
+  },
+})
+
+-- Load the extension
+t.load_extension('zoxide')
+
+-- Add a mapping
+vim.keymap.set("n", "<leader>cd", t.extensions.zoxide.list)
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
@@ -570,7 +602,6 @@ vim.api.nvim_set_keymap('n', '<leader>to', ':tabo', { noremap = true, silent = t
 vim.api.nvim_set_keymap('n', '<S-C-PageDown>', ':tabm +1<CR>', {noremap = true, silent = true})
 -- Move current tab to the left using Shift + Ctrl + PageUp
 vim.api.nvim_set_keymap('n', '<S-C-PageUp>', ':tabm -1<CR>', {noremap = true, silent = true})
-
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- v m: ts=2 sts=2 sw=2 et
