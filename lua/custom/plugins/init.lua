@@ -43,28 +43,8 @@ else
     'tpope/vim-surround', -- quoting/parenthesizing made simple
     'tpope/vim-repeat', -- enable repeating supported plugin maps with .
     'leafOfTree/vim-matchtag', -- highlight matching tags
-    'nanotee/zoxide.vim', -- z command for faster directory navigation
+    -- 'nanotee/zoxide.vim', -- z command for faster directory navigation
     'jvgrootveld/telescope-zoxide', -- z command for faster directory navigation in telescope
-    require("telescope").load_extension('zoxide'),
-    vim.keymap.set("n", "<leader>cd", require("telescope").extensions.zoxide.list),
-    -- "nvim-neorg/neorg",
-    -- build = ":Neorg sync-parsers",
-    -- -- tag = "*",
-    -- dependencies = { "nvim-lua/plenary.nvim" },
-    -- config = function()
-    --     require("neorg").setup {
-    -- 	load = {
-    -- 	["core.defaults"] = {}, -- Loads default behaviour
-    -- 	    ["core.concealer"] = {}, -- Adds pretty icons to your documents
-    -- 	    ["core.dirman"] = { -- Manages Neorg workspaces
-    -- 		config = {
-    -- 		    workspaces = {
-    -- 			notes = "~/notes",
-    -- 		    },
-    -- 		},
-    -- 	    },
-    -- 	},
-    --     }
-    -- end,
+
   }
 end
