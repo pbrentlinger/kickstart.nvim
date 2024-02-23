@@ -603,5 +603,23 @@ vim.api.nvim_set_keymap('n', '<S-C-PageDown>', ':tabm +1<CR>', {noremap = true, 
 -- Move current tab to the left using Shift + Ctrl + PageUp
 vim.api.nvim_set_keymap('n', '<S-C-PageUp>', ':tabm -1<CR>', {noremap = true, silent = true})
 
+vim.cmd('filetype on')
+
+vim.cmd([[
+augroup FiletypeMappings
+autocmd!
+autocmd BufNewFile,BufRead *.cls setfiletype apex
+autocmd BufNewFile,BufRead *.apxc setfiletype apex
+autocmd BufNewFile,BufRead *.apex setfiletype apex
+autocmd BufNewFile,BufRead *.trigger setfiletype apex
+autocmd BufNewFile,BufRead *.soql setfiletype soql
+autocmd BufNewFile,BufRead *.sosl setfiletype sosl
+augroup END
+]])
+
+local ft = require('Comment.ft')
+
+ft.set('apex', {'//%s', '/*%s*/'}) -- https://github.com/numToStr/Comment.nvim?tab=readme-ov-file#%EF%B8%8F-filetypes--languages
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- v m: ts=2 sts=2 sw=2 et

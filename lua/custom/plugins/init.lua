@@ -43,7 +43,7 @@ else
     'tpope/vim-surround', -- quoting/parenthesizing made simple
     'tpope/vim-repeat', -- enable repeating supported plugin maps with .
     'leafOfTree/vim-matchtag', -- highlight matching tags
-    -- 'nanotee/zoxide.vim', -- z command for faster directory navigation
+    'nanotee/zoxide.vim', -- z command for faster directory navigation
     'jvgrootveld/telescope-zoxide', -- z command for faster directory navigation in telescope
 
   }
