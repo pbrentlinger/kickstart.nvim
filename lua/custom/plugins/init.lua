@@ -45,6 +45,7 @@ else
     'leafOfTree/vim-matchtag', -- highlight matching tags
     'nanotee/zoxide.vim', -- z command for faster directory navigation
     'jvgrootveld/telescope-zoxide', -- z command for faster directory navigation in telescope
+    'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting
 
   }
 end
