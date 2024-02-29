@@ -42,6 +42,7 @@ else
     'tpope/vim-unimpaired', -- pairs of handy bracket mappings as well as adding line above and below
     'tpope/vim-surround', -- quoting/parenthesizing made simple
     'tpope/vim-repeat', -- enable repeating supported plugin maps with .
+    'tpope/vim-abolish', -- easily search for, substitute, and abbreviate multiple variants of a word, coerce to snake case etc.
     'leafOfTree/vim-matchtag', -- highlight matching tags
     'nanotee/zoxide.vim', -- z command for faster directory navigation
     'jvgrootveld/telescope-zoxide', -- z command for faster directory navigation in telescope
