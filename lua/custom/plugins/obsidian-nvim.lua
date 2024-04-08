@@ -23,11 +23,18 @@ return {
         path = "~/Documents/synced-Zettels",
       },
     },
-  templates = {
-    subdir = "Templates",
-    date_format = "%YYYY-%MM-%DD",
-    time_format = "%h%h:%m%m",
-  }
+    templates = {
+      subdir = "Templates",
+      date_format = "%YYYY-%MM-%DD",
+      time_format = "%h%h:%m%m",
+    },
     -- see below for full list of options 👇
+    -- URL it will be ignored but you can customize this behavior here.
+    ---@param url string
+    follow_url_func = function(url)
+      -- Open the URL in the default web browser.
+      -- vim.fn.jobstart({"open", url})  -- Mac OS
+      vim.fn.jobstart({"xdg-open", url})  -- linux
+    end,
   },
 }
