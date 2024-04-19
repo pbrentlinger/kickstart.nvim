@@ -125,7 +125,6 @@ require('lazy').setup({
   --       Uncomment any of the lines below to enable them.
   require 'kickstart.plugins.autoformat',
   require 'kickstart.plugins.debug',
-  require 'kickstart.plugins.gitsigns',
   -- require 'kickstart.health',
 
   -- NOTE: The import below automatically adds your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
@@ -252,8 +251,11 @@ t.setup({
 -- Load the extension
 t.load_extension('zoxide')
 
+--
+-- Telescope Mapings using f for find
+--
 -- Add a mapping
-vim.keymap.set("n", "<leader>cd", t.extensions.zoxide.list)
+vim.keymap.set("n", "<leader>fc", t.extensions.zoxide.list, { desc = '[F]ind & [c]hange to [d]irectory' })
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
@@ -269,12 +271,23 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>ff', require('telescope.builtin').find_files, { desc = '[F]ind [F]iles' })
 vim.keymap.set('n', '<leader>fh', require('telescope.builtin').help_tags, { desc = '[F]ind [H]elp' })
 vim.keymap.set('n', '<leader>fw', require('telescope.builtin').grep_string, { desc = '[F]ind current [W]ord' })
 vim.keymap.set('n', '<leader>fg', require('telescope.builtin').live_grep, { desc = '[F]ind by [G]rep' })
 vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { desc = '[F]ind [D]iagnostics' })
+vim.keymap.set('n', '<leader>fm', require('telescope.builtin').marks, { desc = '[F]ind [M]arks' })
+vim.keymap.set('n', '<leader>fk', require('telescope.builtin').keymaps, { desc = '[F]ind [K]ey [M]aps' })
+vim.keymap.set('n', '<leader>fq', vim.fn.nop, { desc = '[F]ind [Q]uick Fix Items' })
+vim.keymap.set('n', '<leader>fqf', require('telescope.builtin').quickfix, { desc = '[F]ind [Q]uick [F]ix list' })
+vim.keymap.set('n', '<leader>fqh', require('telescope.builtin').quickfix, { desc = '[F]ind [Q]uick Fix [H]istory' })
+vim.keymap.set('n', '<leader>fj', require('telescope.builtin').jumplist, { desc = '[F]ind [J]ump List' })
+vim.keymap.set('n', '<leader>fr', require('telescope.builtin').registers, { desc = '[F]ind [R]egisters' })
+
+-- Headings to pair with the gitsign.lua plugin
+vim.keymap.set('n', '<leader>g', vim.fn.nop, { desc = '[G]it commands' })
+vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = '[G]it [F]ind' })
+
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
