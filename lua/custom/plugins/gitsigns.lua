@@ -57,6 +57,7 @@ return {
         map('n', '<leader>ghu', gitsigns.undo_stage_hunk, { desc = 'git [h]unk [u]ndo stage' })
         map('n', '<leader>ghp', gitsigns.preview_hunk, { desc = 'git [h]unk [p]review ' })
 
+        map('n', '<leader>gb', function() end, { desc = 'git [b]uffer... ' })
         map('n', '<leader>gbs', gitsigns.stage_buffer, { desc = 'git [b]uffer [S]tage ' })
         map('n', '<leader>gbr', gitsigns.reset_buffer, { desc = 'git [b]uffer [R]eset' })
 
