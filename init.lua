@@ -48,7 +48,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
+      { 'j-hui/fidget.nvim',       tag = 'legacy', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -60,21 +60,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
-  { -- Adds git releated signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      -- See `:help gitsigns.txt`
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
-  },
-
+  { 'folke/which-key.nvim',          opts = {} },
   { -- Theme inspired by Atom
     'navarasu/onedark.nvim',
     priority = 1000,
@@ -108,7 +94,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',         opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
   { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim' } },
@@ -136,8 +122,10 @@ require('lazy').setup({
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
-  -- require 'kickstart.plugins.autoformat',
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.autoformat',
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.gitsigns',
+  -- require 'kickstart.health',
 
   -- NOTE: The import below automatically adds your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
@@ -148,13 +136,14 @@ require('lazy').setup({
   --    An additional note is that if you only copied in the `init.lua`, you can just comment this line
   --    to get rid of the warning telling you that there are not plugins in `lua/custom/plugins/`.
   { import = 'custom.plugins' },
+  { import = 'custom.conf' },
 }, {})
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
 -- Set highlight on search
-vim.o.hlsearch = false
+vim.o.hlsearch = true
 
 -- Make line numbers default
 vim.wo.number = true
@@ -205,8 +194,8 @@ vim.keymap.set('n', '<Down>', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent
 -- TODO: Make this smooth
 -- vim.keymap.set('i', '<Up>', "v:count == 0 ? '<Esc>gki' : '<Esc>ki'", { expr = true, silent = true })
 -- vim.keymap.set('i', '<Down>', "v:count == 0 ? '<Esc>gji' : '<Esc>ji'", { expr = true, silent = true })
-  vim.keymap.set('i', '<Up>', "<Esc>gki" )
-  vim.keymap.set('i', '<Down>', "<Esc>gji" )
+vim.keymap.set('i', '<Up>', "<Esc>gki")
+vim.keymap.set('i', '<Down>', "<Esc>gji")
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -291,7 +280,7 @@ vim.keymap.set('n', '<leader>fd', require('telescope.builtin').diagnostics, { de
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
   ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'markdown', 'markdown_inline' },
-  modules = { },
+  modules = {},
   sync_install = false,
   ignore_install = {},
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
@@ -503,29 +492,29 @@ function MyTabline()
   end
 
   local tabline = ''
-    local current_tab = vim.fn.tabpagenr()
+  local current_tab = vim.fn.tabpagenr()
 
-    for t = 1, vim.fn.tabpagenr('$') do
-        local tab_page = '%#TabLine#'
-        if t == current_tab then
-            tab_page = '%#TabLineSel#'
-        end
-
-        local tab_name = ' ' .. t .. ' '
-        local win_number = vim.fn.tabpagewinnr(t)
-        if win_number ~= -1 then
-            local bufnr = vim.fn.tabpagebuflist(t)[win_number]
-            local bufname = vim.fn.fnamemodify(vim.fn.bufname(bufnr), ':t')
-            if bufname == '' then
-                bufname = '[No Name]'
-            end
-            tab_name = tab_name .. bufname .. ' '
-        end
-
-        tabline = tabline .. tab_page .. tab_name
+  for t = 1, vim.fn.tabpagenr('$') do
+    local tab_page = '%#TabLine#'
+    if t == current_tab then
+      tab_page = '%#TabLineSel#'
     end
 
-    return tabline .. '%#TabLineFill#%T'
+    local tab_name = ' ' .. t .. ' '
+    local win_number = vim.fn.tabpagewinnr(t)
+    if win_number ~= -1 then
+      local bufnr = vim.fn.tabpagebuflist(t)[win_number]
+      local bufname = vim.fn.fnamemodify(vim.fn.bufname(bufnr), ':t')
+      if bufname == '' then
+        bufname = '[No Name]'
+      end
+      tab_name = tab_name .. bufname .. ' '
+    end
+
+    tabline = tabline .. tab_page .. tab_name
+  end
+
+  return tabline .. '%#TabLineFill#%T'
 end
 
 -- Set tabline as a custom statusline
@@ -535,37 +524,37 @@ vim.o.tabline = '%!v:lua.MyTabline()'
 
 -- Function to close all tabs to the right of the current tab
 function CloseTabsToRight()
-    local current_tab = vim.fn.tabpagenr()
+  local current_tab = vim.fn.tabpagenr()
 
-    for t = vim.fn.tabpagenr('$'), current_tab + 1, -1 do
-        vim.cmd(t .. 'tabclose')
-    end
+  for t = vim.fn.tabpagenr('$'), current_tab + 1, -1 do
+    vim.cmd(t .. 'tabclose')
+  end
 end
 
 -- Function to close all tabs to the left of the current tab
 function CloseTabsToLeft()
-    local current_tab = vim.fn.tabpagenr()
+  local current_tab = vim.fn.tabpagenr()
 
-    for t = current_tab - 1, 1, -1 do
-        vim.cmd(t .. 'tabclose')
-    end
+  for t = current_tab - 1, 1, -1 do
+    vim.cmd(t .. 'tabclose')
+  end
 end
 
 -- Function to move the current tab by n positions
 function MoveTab(n)
-    local current_tab = vim.fn.tabpagenr()
-    local total_tabs = vim.fn.tabpagenr('$')
+  local current_tab = vim.fn.tabpagenr()
+  local total_tabs = vim.fn.tabpagenr('$')
 
-    -- Calculate the new tab position
-    local new_tab = current_tab + n
-    if new_tab < 1 then
-        new_tab = 1
-    elseif new_tab > total_tabs then
-        new_tab = total_tabs
-    end
+  -- Calculate the new tab position
+  local new_tab = current_tab + n
+  if new_tab < 1 then
+    new_tab = 1
+  elseif new_tab > total_tabs then
+    new_tab = total_tabs
+  end
 
-    -- Move to the new tab
-    vim.cmd(tostring(new_tab) .. 'tabmove')
+  -- Move to the new tab
+  vim.cmd(tostring(new_tab) .. 'tabmove')
 end
 
 function MoveTabWrapper(positive)
@@ -573,9 +562,9 @@ function MoveTabWrapper(positive)
 
   if not positive then
     if count <= 0 or nil then
-      count = -2 -- default if no count is passed in, -2 so it actually moves 1 to the left 
+      count = -2                   -- default if no count is passed in, -2 so it actually moves 1 to the left
     else
-      count = -math.abs(count +1) -- this part handles the negative count and works as expected
+      count = -math.abs(count + 1) -- this part handles the negative count and works as expected
     end
   else
     if count == 0 then
@@ -591,37 +580,31 @@ end
 ---------------------------
 vim.api.nvim_set_keymap('n', '<leader>tt', ':tabnew<CR>', { noremap = true, silent = true, desc = 'New Tab' })
 -- Map a key combination to invoke the CloseTabsToLeft function
-vim.api.nvim_set_keymap('n', '<leader>tcl', ':lua CloseTabsToLeft()<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Left' })
+vim.api.nvim_set_keymap('n', '<leader>tcl', ':lua CloseTabsToLeft()<CR>',
+  { noremap = true, silent = true, desc = 'Close Tabs to the Left' })
 -- Map a key combination to invoke the CloseTabsToRight function
-vim.api.nvim_set_keymap('n', '<leader>tcr', ':lua CloseTabsToRight()<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Right' })
-vim.api.nvim_set_keymap('n', '<leader>tcc', ':tabclose<CR>', { noremap = true, silent = true, desc = 'Close Tabs to the Right' })
+vim.api.nvim_set_keymap('n', '<leader>tcr', ':lua CloseTabsToRight()<CR>',
+  { noremap = true, silent = true, desc = 'Close Tabs to the Right' })
+vim.api.nvim_set_keymap('n', '<leader>tcc', ':tabclose<CR>',
+  { noremap = true, silent = true, desc = 'Close Tabs to the Right' })
 -- Map to move tab positon by n where n can be a positive or negative number meaning to the right or left respectively
-vim.api.nvim_set_keymap('n', '<leader>tmr', ':<C-u>lua MoveTabWrapper(true)<CR>', { noremap = true, silent = true, desc = 'Move Tab [n] times right' })
-vim.api.nvim_set_keymap('n', '<leader>tml', ':<C-u>lua MoveTabWrapper(false)<CR>', { noremap = true, silent = true, desc = 'Move Tab [n] times left' })
+vim.api.nvim_set_keymap('n', '<leader>tmr', ':<C-u>lua MoveTabWrapper(true)<CR>',
+  { noremap = true, silent = true, desc = 'Move Tab [n] times right' })
+vim.api.nvim_set_keymap('n', '<leader>tml', ':<C-u>lua MoveTabWrapper(false)<CR>',
+  { noremap = true, silent = true, desc = 'Move Tab [n] times left' })
 vim.api.nvim_set_keymap('n', '<leader>to', ':tabo', { noremap = true, silent = true, desc = 'Close all other tabs' })
 
 -- Move current tab to the right using Shift + Ctrl + PageDown
-vim.api.nvim_set_keymap('n', '<S-C-PageDown>', ':tabm +1<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<S-C-PageDown>', ':tabm +1<CR>', { noremap = true, silent = true })
 -- Move current tab to the left using Shift + Ctrl + PageUp
-vim.api.nvim_set_keymap('n', '<S-C-PageUp>', ':tabm -1<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap('n', '<S-C-PageUp>', ':tabm -1<CR>', { noremap = true, silent = true })
 
 vim.cmd('filetype on')
 
-vim.cmd([[
-augroup FiletypeMappings
-autocmd!
-autocmd BufNewFile,BufRead *.cls setfiletype apex
-autocmd BufNewFile,BufRead *.apxc setfiletype apex
-autocmd BufNewFile,BufRead *.apex setfiletype apex
-autocmd BufNewFile,BufRead *.trigger setfiletype apex
-autocmd BufNewFile,BufRead *.soql setfiletype soql
-autocmd BufNewFile,BufRead *.sosl setfiletype sosl
-augroup END
-]])
 
 local ft = require('Comment.ft')
 
-ft.set('apex', {'//%s', '/*%s*/'}) -- https://github.com/numToStr/Comment.nvim?tab=readme-ov-file#%EF%B8%8F-filetypes--languages
+ft.set('apex', { '//%s', '/*%s*/' }) -- https://github.com/numToStr/Comment.nvim?tab=readme-ov-file#%EF%B8%8F-filetypes--languages
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- v m: ts=2 sts=2 sw=2 et
