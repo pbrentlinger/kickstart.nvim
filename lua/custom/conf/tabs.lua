@@ -110,3 +110,5 @@ vim.api.nvim_set_keymap('n', '<leader>to', ':tabo', { noremap = true, silent = t
 vim.api.nvim_set_keymap('n', '<S-C-PageDown>', ':tabm +1<CR>', { noremap = true, silent = true })
 -- Move current tab to the left using Shift + Ctrl + PageUp
 vim.api.nvim_set_keymap('n', '<S-C-PageUp>', ':tabm -1<CR>', { noremap = true, silent = true })
+
+return {}
