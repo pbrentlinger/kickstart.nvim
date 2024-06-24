@@ -1,7 +1,8 @@
 vim.opt.conceallevel = 1
+
 return {
   "epwalsh/obsidian.nvim",
-  version = "*",  -- recommended, use latest release instead of latest commit
+  version = "*", -- recommended, use latest release instead of latest commit
   lazy = true,
   ft = "markdown",
   -- Replace the above line with this if you only want to load obsidian.nvim for markdown files in your vault:
@@ -35,7 +36,7 @@ return {
     follow_url_func = function(url)
       -- Open the URL in the default web browser.
       -- vim.fn.jobstart({"open", url})  -- Mac OS
-      vim.fn.jobstart({"xdg-open", url})  -- linux
+      vim.fn.jobstart({ "xdg-open", url }) -- linux
     end,
   },
 }
