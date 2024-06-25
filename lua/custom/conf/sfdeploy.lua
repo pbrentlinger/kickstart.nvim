@@ -17,6 +17,8 @@ vim.api.nvim_create_user_command('SFDeployCurrentClass', function()
     -- Open a new terminal in a new tab
     vim.cmd('tabnew | terminal')
     term_bufnr = vim.api.nvim_get_current_buf()
+    -- Set the tab name
+    vim.cmd('file FileToDefOrg')
   else
     -- If a terminal buffer exists, switch to it
     -- Find the window containing the terminal buffer and switch to it
