@@ -502,6 +502,7 @@ cmp.setup {
 
 vim.cmd('filetype on')
 
+require('sfplugin').settings()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- v m: ts=2 sts=2 sw=2 et
