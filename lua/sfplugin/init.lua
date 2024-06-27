@@ -7,22 +7,32 @@ local function run_command(cmd, callback)
   callback(result)
 end
 
+SF_CLI_Buf = nil
+
+-- Function to run shell commands in the SF_CLI buffer
 local function open_terminal(cmd)
-  vim.api.nvim_command('split | terminal')
-  local term_buf = vim.api.nvim_get_current_buf()
-  vim.api.nvim_buf_set_name(term_buf, 'SF_CLI')
+  if SF_CLI_Buf == nil or not vim.api.nvim_buf_is_valid(SF_CLI_Buf) then
+    -- Create a new buffer and store the ID in SF_CLI_Buf
+    SF_CLI_Buf = vim.api.nvim_create_buf(true, true)
+    vim.api.nvim_set_current_buf(SF_CLI_Buf)
+  else
+    vim.api.nvim_set_current_buf(SF_CLI_Buf)
+    -- Reset the modified flag before running termopen again
+    vim.api.nvim_set_option_value("modified", false, { buf = SF_CLI_Buf })
+  end
+  -- Run the command in SF_CLI_Buf since it is the current buffer
   vim.fn.termopen(cmd)
-  vim.api.nvim_set_current_win(term_buf)
 end
+
 
 -- -----------------------------
 -- SF CLI Commands
 -- -----------------------------
 function M.get_current_org()
-  run_command("sfdx force:org:display --json", function(output)
-    local org_info = vim.fn.json_decode(output)
-    vim.api.nvim_echo({ { "Current Default Org: " .. (org_info.result.username or "N/A"), "Normal" } }, false, {})
-  end)
+  local cmd = "sfdx force:org:display --json"
+  local jq_filter =
+  [[ | jq -r '.result | {alias, instanceUrl, username} | to_entries | map("\(.key): \(.value)") | .[]']]
+  open_terminal(cmd .. jq_filter)
 end
 
 function M.set_default_org()
@@ -40,9 +50,7 @@ function M.set_default_org()
         map('i', '<CR>', function()
           local selection = require('telescope.actions.state').get_selected_entry()
           require('telescope.actions').close(prompt_bufnr)
-          run_command("sfdx force:config:set defaultusername=" .. selection.value, function()
-            vim.api.nvim_echo({ { "Default Org set to: " .. selection.value, "Normal" } }, false, {})
-          end)
+          open_terminal("sfdx force:config:set defaultusername=" .. selection.value)
         end)
         return true
       end,
@@ -52,34 +60,25 @@ end
 
 function M.deploy_current_file()
   local file = vim.fn.expand("%:p")
-  run_command("sfdx force:source:deploy -p " .. file, function(output)
-    vim.api.nvim_echo({ { output, "Normal" } }, false, {})
-  end)
+  open_terminal("sfdx force:source:deploy -p " .. file)
 end
 
 function M.retrieve_current_file()
   local file = vim.fn.expand("%:p")
-  run_command("sfdx force:source:retrieve -p " .. file, function(output)
-    vim.api.nvim_echo({ { output, "Normal" } }, false, {})
-  end)
+  open_terminal("sfdx force:source:retrieve -p " .. file)
 end
 
 function M.retrieve_all_files()
   local dir = vim.fn.expand("%:p:h")
-  run_command("sfdx force:source:retrieve -p " .. dir, function(output)
-    vim.api.nvim_echo({ { output, "Normal" } }, false, {})
-  end)
+  open_terminal("sfdx force:source:retrieve -p " .. dir)
 end
 
 function M.run_all_tests()
   local file = vim.fn.expand("%:p")
-  run_command("sfdx force:apex:test:run --classnames " .. file, function(output)
-    vim.api.nvim_echo({ { output, "Normal" } }, false, {})
-  end)
+  open_terminal("sfdx force:apex:test:run --classnames " .. file)
 end
 
 function M.run_selected_test()
-  local file = vim.fn.expand("%:p")
   run_command("sfdx force:apex:test:report --json", function(output)
     local tests = vim.fn.json_decode(output).result.tests
     local test_names = {}
@@ -94,9 +93,7 @@ function M.run_selected_test()
         map('i', '<CR>', function()
           local selection = require('telescope.actions.state').get_selected_entry()
           require('telescope.actions').close(prompt_bufnr)
-          run_command("sfdx force:apex:test:run --classnames " .. selection.value, function(output)
-            vim.api.nvim_echo({ { output, "Normal" } }, false, {})
-          end)
+          open_terminal("sfdx force:apex:test:run --classnames " .. selection.value)
         end)
         return true
       end,
@@ -105,22 +102,24 @@ function M.run_selected_test()
 end
 
 function M.settings()
-  -- Key mappings
-  vim.api.nvim_set_keymap('n', '<leader>F', '<Nop>', { noremap = true, silent = true, desc = 'SF Plugin' })
-  vim.api.nvim_set_keymap('n', '<leader>Fo', '<cmd>lua require("sfplugin").get_current_org()<CR>',
-    { noremap = true, silent = true, desc = 'Get current org' })
-  vim.api.nvim_set_keymap('n', '<leader>Fs', '<cmd>lua require("sfplugin").set_default_org()<CR>',
-    { noremap = true, silent = true, desc = 'Set default org' })
-  vim.api.nvim_set_keymap('n', '<leader>Fd', '<cmd>lua require("sfplugin").deploy_current_file()<CR>',
-    { noremap = true, silent = true, desc = 'Deploy current file to org' })
-  vim.api.nvim_set_keymap('n', '<leader>Fr', '<cmd>lua require("sfplugin").retrieve_current_file()<CR>',
-    { noremap = true, silent = true, desc = 'Retrieve current file from org' })
-  vim.api.nvim_set_keymap('n', '<leader>Fa', '<cmd>lua require("sfplugin").retrieve_all_files()<CR>',
-    { noremap = true, silent = true, desc = 'Retrieve all files from org' })
-  vim.api.nvim_set_keymap('n', '<leader>Ft', '<cmd>lua require("sfplugin").run_all_tests()<CR>',
-    { noremap = true, silent = true, desc = 'Run all tests in file' })
-  vim.api.nvim_set_keymap('n', '<leader>Fts', '<cmd>lua require("sfplugin").run_selected_test()<CR>',
-    { noremap = true, silent = true, desc = 'Run selected test' })
+  local wk = require("which-key")
+
+  -- Register the key mappings with descriptions
+  wk.register({
+    F = {
+      name = "SF Plugin",
+      o = { '<cmd>lua require("sfplugin").get_current_org()<CR>', "Get current org" },
+      s = { '<cmd>lua require("sfplugin").set_default_org()<CR>', "Set default org" },
+      d = { '<cmd>lua require("sfplugin").deploy_current_file()<CR>', "Deploy current file to org" },
+      r = { '<cmd>lua require("sfplugin").retrieve_current_file()<CR>', "Retrieve current file from org" },
+      a = { '<cmd>lua require("sfplugin").retrieve_all_files()<CR>', "Retrieve all files from org" },
+      t = {
+        name = "Run Tests",
+        a = { '<cmd>lua require("sfplugin").run_all_tests()<CR>', "Run all tests in file" },
+        s = { '<cmd>lua require("sfplugin").run_selected_test()<CR>', "Run selected test" },
+      },
+    },
+  }, { prefix = "<leader>" })
 end
 
 return M
