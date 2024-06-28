@@ -34,22 +34,34 @@ end
 -- =============================
 -- SF CLI Commands
 -- =============================
-local function query_orgs(jq_filter)
-  local cmd = "sfdx force:org:display --json"
-  open_terminal(cmd .. jq_filter)
-end
+-- =============================
+-- =============================
+-- Org Commands
+-- =============================
+local query_org = "sf org display --json"
+local get_org_details = "sfdx force:org:list --json"
+Project_Domain = nil
 
+local function project_domain()
+  local jq_filter =
+  [[ | jq -r '.result.username | capture("(?<domain>.*?)@(?<rest>.*)").rest | sub("\\.com.*$"; "")' ]]
+  local cmd = query_org .. jq_filter
+  run_command(cmd, function(result)
+    Project_Domain = result:gsub("%s*$", "")
+  end)
+end
+project_domain()
 
 function M.get_current_org()
   local jq_filter =
   [[ | jq -r '.result | {alias, instanceUrl, username} | to_entries | map("\(.key): \(.value)") | .[]']]
-  query_orgs(jq_filter)
+  open_terminal(query_org .. jq_filter)
 end
 
 -- Function to fetch and set the default org alias global var
 local function fetch_default_org()
   local jq_filter = [[ | jq -r '.result.alias']]
-  local cmd = "sfdx force:org:display --json" .. jq_filter
+  local cmd = query_org .. jq_filter
   run_command(cmd, function(result)
     -- Trim any leading/trailing whitespace or newline characters
     local trimmed_result = result:gsub("^%s+", ""):gsub("%s+$", "")
@@ -142,6 +154,42 @@ function M.set_target_org()
   end)
 end
 
+-- Function to switch orgs based on Project_Domain
+function M.switch_org()
+  local jq_filter =
+      [[ | jq -r '.result.nonScratchOrgs[] | select(.username | capture("(?<domain>.*?)@(?<rest>.*)").rest | sub("\\.com.*$"; "") == "]] ..
+      Project_Domain .. [[") | .alias']]
+  local jq_command = get_org_details .. jq_filter
+  run_command(jq_command, function(output)
+    local org_names = {}
+    for alias in output:gmatch("[^\r\n]+") do
+      table.insert(org_names, alias)
+    end
+
+    require('telescope.pickers').new({}, {
+      prompt_title = "Current Company: " .. (Project_Domain) .. "  Current Org: " .. (Default_org or "None"),
+      finder = require('telescope.finders').new_table { results = org_names },
+      sorter = require('telescope.config').values.generic_sorter({}),
+      attach_mappings = function(prompt_bufnr, map)
+        map('i', '<CR>', function()
+          local selection = require('telescope.actions.state').get_selected_entry()
+          require('telescope.actions').close(prompt_bufnr)
+          open_terminal("sf config set target-org " .. selection.value, function()
+            fetch_default_org()
+            require('lualine').refresh()
+          end)
+        end)
+        return true
+      end,
+    }):find()
+  end)
+end
+
+-- TODO make org pickers for scratch orgs
+
+-- =============================
+-- File Commands
+-- =============================
 function M.deploy_current_file()
   local file = vim.fn.expand("%:p")
   open_terminal("sfdx force:source:deploy -p " .. file)
@@ -157,6 +205,9 @@ function M.retrieve_all_files()
   open_terminal("sfdx force:source:retrieve -p " .. dir)
 end
 
+-- =============================
+-- Test Commands
+-- =============================
 function M.run_all_tests_in_file()
   local file = vim.fn.expand("%:p")
   local class_name = vim.fn.fnamemodify(file, ":t:r")
@@ -190,6 +241,9 @@ function M.run_selected_test()
   }):find()
 end
 
+-- =============================
+-- Key bindings
+-- =============================
 function M.settings()
   local wk = require("which-key")
 
@@ -200,8 +254,8 @@ function M.settings()
       o = {
         name = "Org Commands",
         g = { '<cmd>lua require("sfplugin").get_current_org()<CR>', "(G)et current org" },
-        t = { '<cmd>lua require("sfplugin").set_target_org()<CR>', "Set (t)arget org" },
-        -- s = { '<cmd>lua require("sfplugin").create_scratch_org()<CR>', "Create (s)cratch org" },
+        t = { '<cmd>lua require("sfplugin").set_target_org()<CR>', "Set (t)arget non-scratch org" },
+        s = { '<cmd>lua require("sfplugin").switch_org()<CR>', "(s)witch sandbox org" },
       },
       d = { '<cmd>lua require("sfplugin").deploy_current_file()<CR>', "Deploy current file to org" },
       r = { '<cmd>lua require("sfplugin").retrieve_current_file()<CR>', "Retrieve current file from org" },
