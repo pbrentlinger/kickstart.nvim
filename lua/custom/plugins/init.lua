@@ -48,5 +48,6 @@ else
     'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting
     'tpope/vim-obsession',
     'mg979/vim-visual-multi',
+    'pbrentlinger/salesforce-cli-nvim',
   }
 end
