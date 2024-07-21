@@ -23,13 +23,14 @@ vim.o.shiftwidth = 2
 vim.o.expandtab = true
 
 -- Set local foldmethod to 'indent'
-vim.api.nvim_command('setlocal foldmethod=indent')
+vim.api.nvim_command 'setlocal foldmethod=indent'
 -- Disable folding
-vim.api.nvim_command('setlocal nofoldenable')
+vim.api.nvim_command 'setlocal nofoldenable'
 -- Set foldlevel to 99
-vim.api.nvim_command('setlocal foldlevel=99')
-vim.api.nvim_command('setlocal foldminlines=2')
-vim.api.nvim_command('setlocal foldnestmax=2')
+vim.api.nvim_command 'setlocal foldlevel=99'
+vim.api.nvim_command 'setlocal foldminlines=2'
+vim.api.nvim_command 'setlocal foldnestmax=2'
+vim.cmd 'command! -nargs=* -complete=help H tab help <args>'
 
 -- load utility plugins
 if vim.g.vscode then
@@ -37,17 +38,15 @@ if vim.g.vscode then
 else
   -- ordinary Neovim
   return {
-    vim.cmd("command! -nargs=* -complete=help H tab help <args>"),
-    'phelipetls/vim-hugo',             -- HUGO syntax
-    'tpope/vim-unimpaired',            -- pairs of handy bracket mappings as well as adding line above and below
-    'tpope/vim-surround',              -- quoting/parenthesizing made simple
-    'tpope/vim-repeat',                -- enable repeating supported plugin maps with .
-    'tpope/vim-abolish',               -- easily search for, substitute, and abbreviate multiple variants of a word, coerce to snake case etc.
-    'leafOfTree/vim-matchtag',         -- highlight matching tags
-    'nanotee/zoxide.vim',              -- z command for faster directory navigation
-    -- 'jvgrootveld/telescope-zoxide', -- z command for faster directory navigation in telescope
-    'mcombeau/vim-twee-sugarcube',     -- tweet syntax highlighting
-    'jansedivy/jai.vim',               -- jai progamming lang for game dev https://github.com/jansedivy/jai.vim
-
+    'phelipetls/vim-hugo', -- HUGO syntax
+    'tpope/vim-unimpaired', -- pairs of handy bracket mappings as well as adding line above and below
+    'tpope/vim-surround', -- quoting/parenthesizing made simple
+    'tpope/vim-repeat', -- enable repeating supported plugin maps with .
+    'tpope/vim-abolish', -- easily search for, substitute, and abbreviate multiple variants of a word, coerce to snake case etc.
+    'leafOfTree/vim-matchtag', -- highlight matching tags
+    'nanotee/zoxide.vim', -- z command for faster directory navigation
+    'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting
+    'tpope/vim-obsession',
+    'mg979/vim-visual-multi',
   }
 end

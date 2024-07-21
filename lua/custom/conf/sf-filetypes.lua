@@ -1,9 +1,8 @@
-local ft = require('Comment.ft')
+local ft = require 'Comment.ft'
 ft.set('apex', { '//%s', '/*%s*/' })
 
 -- apex_comment.lua
-return {
-  vim.cmd([[
+vim.cmd [[
         augroup SalesForceGroup
         autocmd!
         autocmd BufNewFile,BufRead *.cls setfiletype apex
@@ -13,5 +12,5 @@ return {
         autocmd BufNewFile,BufRead *.soql setfiletype soql
         autocmd BufNewFile,BufRead *.sosl setfiletype sosl
         augroup END
-        ]])
-}
+        ]]
+return {}
