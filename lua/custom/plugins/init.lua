@@ -48,6 +48,7 @@ else
     'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting
     'tpope/vim-obsession',
     'mg979/vim-visual-multi',
-    'pbrentlinger/salesforce-cli-nvim',
+    -- zettel plugins
+    'nvim-telekasten/calendar-vim',
   }
 end

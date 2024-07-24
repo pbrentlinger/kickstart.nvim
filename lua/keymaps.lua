@@ -1,16 +1,6 @@
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
--- Set fold level to 1 (close top-level folds)
-vim.api.nvim_set_keymap('n', '<leader>1', ':set foldlevel=1<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>2', ':set foldlevel=1<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>3', ':set foldlevel=1<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>4', ':set foldlevel=1<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>5', ':set foldlevel=1<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>6', ':set foldlevel=1<CR>', { noremap = true, silent = true })
--- Set fold level to 99 (open all folds)
-vim.api.nvim_set_keymap('n', '<leader>z', ':set foldlevel=99<CR>', { noremap = true, silent = true })
-
 -- Set highlight on search as defined in options,
 -- vim.opt.hlsearch = true
 -- but clear on pressing <Esc> in normal mode
