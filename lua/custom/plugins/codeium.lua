@@ -27,7 +27,7 @@ else
       -- vim.api.nvim_set_keymap('n', '<leader>cc', '<cmd>' .. vim.fn['codeium#Chat']() .. '<CR>', { noremap = true, silent = true })
 
       -- Add the ToggleCodeium function
-      vim.api.nvim_set_keymap('n', '<Leader>ta', ':lua ToggleCodeium()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<Leader>ta', ':lua ToggleCodeium()<CR>', { desc = 'Toggle Codeium AI', noremap = true, silent = true })
 
       function ToggleCodeium()
         if vim.g.codeium_enabled == nil then
