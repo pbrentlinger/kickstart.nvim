@@ -31,7 +31,9 @@ return {
 
       -- Custom Highlights --
       colors = {}, -- Override default colors
-      highlights = {}, -- Override highlight groups
+      highlights = {
+        ['NormalNC'] = { bg = '#232730' }, -- slightly darker background for inactive windows
+      },
 
       -- Plugins Config --
       diagnostics = {
