@@ -32,7 +32,7 @@ return {
       -- Custom Highlights --
       colors = {}, -- Override default colors
       highlights = {
-        ['NormalNC'] = { bg = '#232730' }, -- slightly darker background for inactive windows
+        ['NormalNC'] = { bg = '#1c1f24' }, -- slightly darker background for inactive windows
       },
 
       -- Plugins Config --

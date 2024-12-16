@@ -31,6 +31,7 @@ return {
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>f', group = '[F]ind' },
         { '<leader>z', group = '[z]ettel' },
+        { '<leader>b', group = '[B]uild' },
       }
     end,
   },
