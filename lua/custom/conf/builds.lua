@@ -7,18 +7,20 @@ local function managed_terminal(command)
         if vim.api.nvim_win_get_buf(win) == buf then
           vim.api.nvim_set_current_win(win)
           vim.fn.chansend(vim.bo[buf].channel, command .. '\n')
+          vim.cmd 'normal! G'
           return
         end
       end
       -- Terminal not visible, open in a new split
-      vim.cmd 'vsplit'
+      vim.cmd('botright vsplit')
       vim.api.nvim_set_current_buf(buf)
       vim.fn.chansend(vim.bo[buf].channel, command .. '\n')
+      vim.cmd 'normal! G'
       return
     end
   end
   -- No terminal found, create a new one
-  vim.cmd.vnew()
+  vim.cmd('botright vsplit')
   vim.cmd.term()
   local job_id = vim.bo.channel
   vim.fn.chansend(job_id, command .. '\n')
@@ -43,6 +45,7 @@ local function build_run()
     -- Construct the build command with output to 'bin'
     local command = 'odin run . -out:' .. bin_dir .. '/' .. file_name
     managed_terminal(command)
+    vim.cmd 'normal! G'
   else
     print('No build command configured for this file type: ' .. filetype)
   end
