@@ -12,7 +12,7 @@ local function managed_terminal(command)
         end
       end
       -- Terminal not visible, open in a new split
-      vim.cmd('botright vsplit')
+      vim.cmd 'botright vsplit'
       vim.api.nvim_set_current_buf(buf)
       vim.fn.chansend(vim.bo[buf].channel, command .. '\n')
       vim.cmd 'normal! G'
@@ -20,7 +20,7 @@ local function managed_terminal(command)
     end
   end
   -- No terminal found, create a new one
-  vim.cmd('botright vsplit')
+  vim.cmd 'botright vsplit'
   vim.cmd.term()
   local job_id = vim.bo.channel
   vim.fn.chansend(job_id, command .. '\n')
@@ -37,13 +37,31 @@ end
 
 -- Function to determine the file type and execute the appropriate build command
 local function build_run()
+  local current_dir_name = vim.fn.fnamemodify(vim.fn.expand '%:p:h', ':t')
   local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
   -- Ensure the 'bin' directory exists
   local bin_dir = setup_bin_dir()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
-    local command = 'odin run . -out:' .. bin_dir .. '/' .. file_name
+    local command = 'odin run ' .. file_path .. '/. -vet -out:' .. bin_dir .. '/' .. current_dir_name .. '_' .. file_name
+    managed_terminal(command)
+    vim.cmd 'normal! G'
+  else
+    print('No build command configured for this file type: ' .. filetype)
+  end
+end
+
+local function build_run_file()
+  local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
+  -- Ensure the 'bin' directory exists
+  local bin_dir = setup_bin_dir()
+  local filetype = vim.bo.filetype
+  if filetype == 'odin' then
+    -- Construct the build command with output to 'bin'
+    local command = 'odin run ' .. file_path .. '/. -vet -out:' .. bin_dir .. '/' .. file_name
     managed_terminal(command)
     vim.cmd 'normal! G'
   else
@@ -110,6 +128,7 @@ end
 return {
   -- Key mapping for <leader>br to run the build command
   vim.keymap.set('n', '<leader>br', build_run, { desc = 'Build and run project based on file type' }),
+  vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build and run project based on file type' }),
   vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' }),
   vim.keymap.set('n', '<leader>bs', test_specific_case, { desc = 'Test specific Odin test case' }),
 }
