@@ -45,7 +45,7 @@ local function build_run()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. file_path .. '/. -vet -out:' .. bin_dir .. '/' .. current_dir_name .. '_' .. file_name
+    local command = 'odin run ' .. file_path .. '/. -out:' .. bin_dir .. '/' .. current_dir_name .. '_' .. file_name
     managed_terminal(command)
     vim.cmd 'normal! G'
   else
