@@ -28,7 +28,7 @@ return {
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
-      { 'nvim-tree/nvim-web-devicons',            enabled = vim.g.have_nerd_font },
+      { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -76,30 +76,31 @@ return {
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
 
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-      vim.keymap.set('n', '<leader>?', builtin.oldfiles, { desc = '[?] Find recently opened files' })
+      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Search existing buffers' })
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[ ] [S]earch existing [b]uffers' })
+      vim.keymap.set('n', '<leader>?', builtin.oldfiles, { desc = '[?] Search recently opened files' })
+      vim.keymap.set('n', '<leader>s?', builtin.oldfiles, { desc = '[?] Search recently opened files' })
 
       -- Setting f to no op for which-key
-      vim.keymap.set('n', '<leader>f', vim.fn.nop, { desc = '[F]ind with telescope' })
-      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
-      vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
-      vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = '[F]ind current [W]ord' })
-      vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '[F]ind by [G]rep' })
-      vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
-      vim.keymap.set('n', '<leader>fm', builtin.marks, { desc = '[F]ind [M]arks' })
-      vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]ey Maps' })
-
-      vim.keymap.set('n', '<leader>fq', vim.fn.nop, { desc = '[F]ind [Q]uick Fix Items' })
-      vim.keymap.set('n', '<leader>fqf', builtin.quickfix, { desc = '[F]ind [Q]uick [F]ix list' })
-      vim.keymap.set('n', '<leader>fqh', builtin.quickfix, { desc = '[F]ind [Q]uick Fix [H]istory' })
-      vim.keymap.set('n', '<leader>fj', builtin.jumplist, { desc = '[F]ind [J]ump List' })
-      vim.keymap.set('n', '<leader>fr', builtin.registers, { desc = '[F]ind [R]egisters' })
+      vim.keymap.set('n', '<leader>s', vim.fn.nop, { desc = '[S]earch' })
+      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
+      vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch [W]ord' })
+      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch [G]rep' })
+      vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
+      vim.keymap.set('n', '<leader>sm', builtin.marks, { desc = '[S]earch [M]arks' })
+      vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
+      vim.keymap.set('n', '<leader>sq', vim.fn.nop, { desc = '[S]earch [Q]uick Fix Items' })
+      vim.keymap.set('n', '<leader>sqf', builtin.quickfix, { desc = '[S]earch [Q]uick [F]ix list' })
+      vim.keymap.set('n', '<leader>sqh', builtin.quickfix, { desc = '[S]earch [Q]uick Fix [H]istory' })
+      vim.keymap.set('n', '<leader>sj', builtin.jumplist, { desc = '[S]earch [J]ump List' })
+      vim.keymap.set('n', '<leader>sr', builtin.registers, { desc = '[S]earch [R]egisters' })
 
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 
-      vim.keymap.set('n', '<leader>g', builtin.git_files, { desc = '[G]it [F]ind' })
+      vim.keymap.set('n', '<leader>st', builtin.git_files, { desc = '[S]earch Gi[t]' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()

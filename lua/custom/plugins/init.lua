@@ -38,17 +38,17 @@ if vim.g.vscode then
 else
   -- ordinary Neovim
   return {
-    'phelipetls/vim-hugo', -- HUGO syntax
-    'tpope/vim-unimpaired', -- pairs of handy bracket mappings as well as adding line above and below
-    'tpope/vim-surround', -- quoting/parenthesizing made simple
-    'tpope/vim-repeat', -- enable repeating supported plugin maps with .
-    'tpope/vim-abolish', -- easily search for, substitute, and abbreviate multiple variants of a word, coerce to snake case etc.
-    'leafOfTree/vim-matchtag', -- highlight matching tags
-    'nanotee/zoxide.vim', -- z command for faster directory navigation
-    'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting
-    'tpope/vim-obsession',
-    'mg979/vim-visual-multi',
+    'phelipetls/vim-hugo', -- HUGO syntax highlighting https://github.com/phelipetls/vim-hugo
+    'tpope/vim-unimpaired', -- pairs of handy bracket mappings as well as adding line above and below https://github.com/tpope/vim-unimpaired
+    'tpope/vim-surround', -- quoting/parenthesizing made simple https://github.com/tpope/vim-surround
+    'tpope/vim-repeat', -- enable repeating supported plugin maps with . https://github.com/tpope/vim-repeat
+    'tpope/vim-abolish', -- easily search for, substitute, and abbreviate multiple variants of a word, coerce to snake case etc. https://github.com/tpope/vim-abolish
+    'leafOfTree/vim-matchtag', -- highlight matching tags https://github.com/leafOfTree/vim-matchtag
+    'nanotee/zoxide.vim', -- z command for faster directory navigation https://github.com/nanotee/zoxide.vim
+    'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting https://github.com/mcombeau/vim-twee-sugarcube
+    'tpope/vim-obsession', -- https://github.com/tpope/vim-obsession
+    'mg979/vim-visual-multi', -- https://github.com/mg979/vim-visual-multi
     -- zettel plugins
-    'nvim-telekasten/calendar-vim',
+    -- 'nvim-telekasten/calendar-vim',
   }
 end

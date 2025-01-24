@@ -64,9 +64,9 @@ return {
     })
 
     -- Set up keymapping
-    vim.keymap.set('n', '<leader>tl', function()
+    vim.keymap.set('n', '<leader>fl', function()
       M.LspToggle()
-    end, { noremap = true, silent = true })
+    end, { noremap = true, silent = true, desc = '[F]lip [L]SP Toggle' })
 
     -- Make the module available globally
     _G.lsptoggle = M

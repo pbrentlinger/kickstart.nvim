@@ -52,10 +52,10 @@ return {
   vim.keymap.set('n', '<leader>j', '<cmd>lprev<CR>zz'),
 
   -- menu to replace word you are on
-  vim.keymap.set('n', '<leader>s', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]]),
+  vim.keymap.set('n', '<leader>rw', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = '[R]eplace [W]ord' }),
 
   -- makes script executable
-  vim.keymap.set('n', '<leader>x', '<cmd>!chmod +x %<CR>', { silent = true }),
+  vim.keymap.set('n', '<leader>xx', '<cmd>!chmod +x %<CR>', { silent = true, desc = '[X] make script executable' }),
 
   -- terminal mode remaps --
   -- exit terminal mode going to normal-terminal mode
@@ -88,8 +88,10 @@ return {
   vim.keymap.set('i', '<S-Home>', '<Esc>v0'),
   vim.keymap.set('i', '<S-End>', '<Esc>v$'),
 
-  -- tabpage navigation found in /tabs.lua
+  -- toggle undotree
+  vim.api.nvim_set_keymap('n', '<leader>fu', ":lua require('undotree').toggle()<CR>", { noremap = true, silent = true, desc = '[F]lip [U]ndotree Toggle' }),
 
+  -- LEAVE THIS AT BOTTOM AS I DON't FEEL LIKE FIGURING OUT WHY OTHERWISE IT BREAKS
   -- Neotree keymaps
   -- vim.cmd([[nnoremap \ :Neotree toggle reveal_force_cwd<cr>]]),
   vim.cmd [[nnoremap <leader>\ :Neotree git_status<cr>]],

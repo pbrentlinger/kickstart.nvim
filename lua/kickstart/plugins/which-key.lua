@@ -20,18 +20,19 @@ return {
     config = function() -- This is the function that runs, AFTER loading
       require('which-key').setup()
 
-      -- Document existing key chains
+      -- DocumencopeFuzzyCommandSearch) existing key chains
       require('which-key').add {
-        { '<leader>c', group = '[C]ode' },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
-        { '<leader>f', group = '[F]ind' },
-        { '<leader>z', group = '[z]ettel' },
-        { '<leader>b', group = '[B]uild' },
+        { '<leader>b', group = '[B]uild' }, -- automatic icon
+        { '<leader>c', group = '[C]ode', icon = '' },
+        { '<leader>f', group = '[F]lip Toggles' }, -- automatic icon
+        { '<leader>g', group = '[G]it Hunk', mode = { 'n', 'v' }, icon = '' },
+        { '<leader>l', group = '[L]sp', icon = '' },
+        { '<leader>lg', group = '[L]sp [G]oto', icon = '' },
+        { '<leader>r', group = '[R]efactor', icon = '' },
+        { '<leader>s', group = '[S]earch', icon = '' },
+        { '<leader>t', group = '[T]abs', icon = '' },
+        { '<leader>x', group = 'e[X]ecute commands', icon = '' },
+        -- { '<leader>z', group = '[z]ettel' },
       }
     end,
   },
