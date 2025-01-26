@@ -43,6 +43,7 @@ local function build_run()
   -- Ensure the 'bin' directory exists
   local bin_dir = setup_bin_dir()
   local filetype = vim.bo.filetype
+
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
     local command = 'odin run ' .. file_path .. '/. -out:' .. bin_dir .. '/' .. current_dir_name .. '_' .. file_name
@@ -61,9 +62,29 @@ local function build_run_file()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. file_path .. '/. -out:' .. bin_dir .. '/' .. file_name
+    local command = 'odin run ' .. file_path .. '/' .. file_name .. '.odin -file -out:' .. bin_dir .. '/' .. file_name
     managed_terminal(command)
     vim.cmd 'normal! G'
+  elseif filetype == 'asciidoc' then
+    -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf ' .. file_path .. '/' .. file_name .. '.adoc'
+    managed_terminal(pdf_command)
+    vim.cmd 'normal! G'
+    -- GhostScript Optimization
+    local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
+      .. file_name
+      .. '-opt.pdf '
+      .. file_name
+      .. '.pdf'
+    managed_terminal(pdf_optimizer_command)
+    vim.cmd 'normal! G'
+
+    local cleanup_cmd = 'rm -f ' .. file_name .. '.pdf'
+    managed_terminal(cleanup_cmd)
+    vim.cmd 'normal! G'
+
+    local open_pdf_cmd = 'xdg-open ' .. file_name .. '-opt.pdf'
+    managed_terminal(open_pdf_cmd)
   else
     print('No build command configured for this file type: ' .. filetype)
   end
@@ -125,10 +146,23 @@ local function test_specific_case()
   end
 end
 
-return {
-  -- Key mapping for <leader>br to run the build command
-  vim.keymap.set('n', '<leader>br', build_run, { desc = 'Build and run project based on file type' }),
-  vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build and run project based on file type' }),
-  vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' }),
-  vim.keymap.set('n', '<leader>bs', test_specific_case, { desc = 'Test specific Odin test case' }),
-}
+-- In your keymaps.lua or similar config file
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'asciidoc',
+  callback = function()
+    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build file as self-contained package' })
+  end,
+})
+
+-- For Odin files
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'odin',
+  callback = function()
+    vim.keymap.set('n', '<leader>br', build_run, { desc = 'Build and run project based on file type' })
+    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build file as self-contained package' })
+    vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' })
+    vim.keymap.set('n', '<leader>bs', test_specific_case, { desc = 'Test specific Odin test case' })
+  end,
+})
+
+return {}
