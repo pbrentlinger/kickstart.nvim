@@ -150,7 +150,7 @@ end
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'asciidoc',
   callback = function()
-    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build file as self-contained package' })
+    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Make Asciidoc optimized PDF and view it' })
     vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
   end,
 })
