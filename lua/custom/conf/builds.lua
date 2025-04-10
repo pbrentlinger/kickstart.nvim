@@ -146,11 +146,12 @@ local function test_specific_case()
   end
 end
 
--- In your keymaps.lua or similar config file
+-- For AsciiDoc files
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'asciidoc',
   callback = function()
     vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build file as self-contained package' })
+    vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
   end,
 })
 

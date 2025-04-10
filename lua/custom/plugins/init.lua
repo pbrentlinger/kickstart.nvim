@@ -31,7 +31,9 @@ vim.api.nvim_command 'setlocal foldlevel=99'
 vim.api.nvim_command 'setlocal foldminlines=2'
 vim.api.nvim_command 'setlocal foldnestmax=2'
 vim.cmd 'command! -nargs=* -complete=help H tab help <args>'
-
+vim.filetype.add {
+  pattern = { ['.*/hypr/.*%.conf'] = 'hyprlang' },
+}
 -- load utility plugins
 if vim.g.vscode then
   -- VSCode extension
