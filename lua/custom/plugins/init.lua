@@ -4,6 +4,33 @@
 -- See the kickstart.nvim README for more information
 --
 -- === Settings ===
+
+-- When in Neovide
+if vim.g.neovide then
+  -- Put anything you want to happen only in Neovide here
+  -- vim.print(vim.g.neovide_version)
+  vim.g.neovide_opacity = 0.9
+  vim.g.neovide_normal_opacity = 0.9
+
+  -- fonts
+  -- Using a no ligature font since I want to see what I have typed;
+  -- Font size h:14 = 14px
+  vim.o.guifont = 'JetBrains Mono NL:h14'
+
+  -- Scale factor settings
+  vim.g.neovide_scale_factor = 1.0
+  local change_scale_factor = function(delta)
+    vim.g.neovide_scale_factor = vim.g.neovide_scale_factor * delta
+  end
+  vim.keymap.set('n', '<C-=>', function()
+    change_scale_factor(1.1)
+  end)
+  vim.keymap.set('n', '<C-->', function()
+    change_scale_factor(1 / 1.1)
+  end)
+end
+
+-- When in VSCODE
 if vim.g.vscode then
   -- VSCode extension
   vim.wo.relativenumber = false
@@ -40,16 +67,20 @@ if vim.g.vscode then
 else
   -- ordinary Neovim
   return {
-    'phelipetls/vim-hugo', -- HUGO syntax highlighting https://github.com/phelipetls/vim-hugo
+    -- VIM motion/selection plugins
     'tpope/vim-unimpaired', -- pairs of handy bracket mappings as well as adding line above and below https://github.com/tpope/vim-unimpaired
     'tpope/vim-surround', -- quoting/parenthesizing made simple https://github.com/tpope/vim-surround
-    'tpope/vim-repeat', -- enable repeating supported plugin maps with . https://github.com/tpope/vim-repeat
     'tpope/vim-abolish', -- easily search for, substitute, and abbreviate multiple variants of a word, coerce to snake case etc. https://github.com/tpope/vim-abolish
+    'tpope/vim-repeat', -- enable repeating supported plugin maps with . https://github.com/tpope/vim-repeat
     'leafOfTree/vim-matchtag', -- highlight matching tags https://github.com/leafOfTree/vim-matchtag
+    'mg979/vim-visual-multi', -- fancy cursor things https://github.com/mg979/vim-visual-multi
+    -- VIM SYS plugins
+    'tpope/vim-obsession', -- session management https://github.com/tpope/vim-obsession
     'nanotee/zoxide.vim', -- z command for faster directory navigation https://github.com/nanotee/zoxide.vim
+    -- ===================================
+    -- language plugins
+    'phelipetls/vim-hugo', -- HUGO syntax highlighting https://github.com/phelipetls/vim-hugo
     'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting https://github.com/mcombeau/vim-twee-sugarcube
-    'tpope/vim-obsession', -- https://github.com/tpope/vim-obsession
-    'mg979/vim-visual-multi', -- https://github.com/mg979/vim-visual-multi
     -- zettel plugins
     -- 'nvim-telekasten/calendar-vim',
   }
