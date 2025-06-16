@@ -85,6 +85,12 @@ local function build_run_file()
 
     local open_pdf_cmd = 'xdg-open ' .. file_name .. '-opt.pdf'
     managed_terminal(open_pdf_cmd)
+  elseif filetype == 'c' then
+    local bin_path = bin_dir .. '/' .. file_name
+    local command = 'gcc -ansi ' .. file_path .. '/' .. file_name .. '.c' .. ' -o ' .. bin_dir .. '/' .. file_name
+    managed_terminal(command)
+    managed_terminal(bin_path)
+    vim.cmd 'normal! G'
   else
     print('No build command configured for this file type: ' .. filetype)
   end
@@ -166,4 +172,11 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+-- For c files
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'c',
+  callback = function()
+    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build file useing gcc -ascii' })
+  end,
+})
 return {}
