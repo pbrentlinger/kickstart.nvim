@@ -91,6 +91,11 @@ local function build_run_file()
     managed_terminal(command)
     managed_terminal(bin_path)
     vim.cmd 'normal! G'
+  elseif filetype == 'ruby' then
+    -- Construct the build command with output to 'bin'
+    local command = 'ruby ' .. file_path .. '/' .. file_name .. '.rb'
+    managed_terminal(command)
+    vim.cmd 'normal! G'
   else
     print('No build command configured for this file type: ' .. filetype)
   end
@@ -99,11 +104,16 @@ end
 -- Function to determine the file type and execute the appropriate test command
 local function test_run()
   local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
   -- Ensure the 'bin' directory exists
   local bin_dir = setup_bin_dir()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
     managed_terminal('odin test . -out:' .. bin_dir .. '/' .. file_name)
+  elseif filetype == 'ruby' then
+    managed_terminal('cd ' .. file_path)
+    managed_terminal 'cd ..'
+    managed_terminal 'rspec'
   else
     print('No test command configured for this file type: ' .. filetype)
   end
@@ -179,4 +189,14 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build file useing gcc -ascii' })
   end,
 })
+
+-- For c files
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'ruby',
+  callback = function()
+    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build/execture ruby files' })
+    vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' })
+  end,
+})
+
 return {}

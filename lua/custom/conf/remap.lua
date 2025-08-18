@@ -43,7 +43,12 @@ return {
   -- vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
   vim.keymap.set('n', '<leader><CR>', 'i<CR><Esc>'),
 
-  vim.keymap.set('n', '<leader>f', vim.lsp.buf.format),
+  vim.keymap.set('n', '<leader>lf', vim.lsp.buf.format, { desc = '[L]SP [F]ormat' }),
+
+  -- toggle spell checker
+  vim.keymap.set('n', '<leader>fs', function()
+    vim.opt_local.spell = not vim.opt_local.spell:get()
+  end, { desc = '[F]lip [S]pell' }),
 
   -- quick fix navigation
   -- vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz"),
@@ -62,11 +67,13 @@ return {
   vim.keymap.set('t', '<Esc>', '<C-\\><C-n>'),
   vim.keymap.set('t', '<C-c>', '<C-\\><C-n>'),
   vim.keymap.set('t', '<C-[>', '<C-\\><C-n>'),
+
+  -- pass litteral escape to terminal
   vim.keymap.set('t', '<A-[>', '<Esc>'),
+  vim.keymap.set('t', '<A-c>', '<C-c>'),
 
   -- clear terminal
-  vim.api.nvim_set_keymap('t', '<C-l>', '<C-\\><C-n>:clear<CR>', { noremap = true }),
-  vim.api.nvim_set_keymap('n', '<C-l>', ':clear<CR>', { noremap = true }),
+  vim.api.nvim_set_keymap('t', '<C-l>', [[clear<CR>]], { noremap = true }),
 
   -- move between windows
   vim.keymap.set('n', '<A-h>', '<C-w>h'),
