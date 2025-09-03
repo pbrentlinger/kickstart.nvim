@@ -30,7 +30,7 @@ return {
   vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]]),
 
   -- This is going to get me cancelled
-  vim.keymap.set('i', '<C-c>', '<Esc>'),
+  -- vim.keymap.set('i', '<C-c>', '<Esc>'),
   -- Make saving faster...
 
   -- vim.keymap.set("i", "<C-s>", "<Esc>:w<CR>"),
@@ -65,7 +65,7 @@ return {
   -- terminal mode remaps --
   -- exit terminal mode going to normal-terminal mode
   vim.keymap.set('t', '<Esc>', '<C-\\><C-n>'),
-  vim.keymap.set('t', '<C-c>', '<C-\\><C-n>'),
+  -- vim.keymap.set('t', '<C-c>', '<C-\\><C-n>'),
   vim.keymap.set('t', '<C-[>', '<C-\\><C-n>'),
 
   -- pass litteral escape to terminal
