@@ -165,12 +165,40 @@ local function test_specific_case()
   end
 end
 
+local function publish_asciidoc_web()
+  local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
+  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+  local html = esc(file_path .. '/' .. file_name .. '.html')
+
+  -- Generate HTML without embedded CSS (no stylesheet at all)
+  local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
+  managed_terminal(html_cmd)
+  vim.cmd 'normal! G'
+end
+
+local function publish_asciidoc_print()
+  local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
+  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+  local xml = esc(file_path .. '/' .. file_name .. '.xml')
+  local odt = esc(file_path .. '/' .. file_name .. '.odt')
+  local to_docbook = 'asciidoctor -b docbook5 -o ' .. xml .. ' ' .. adoc
+  managed_terminal(to_docbook)
+  local to_odt = 'pandoc -f docbook -t odt -o ' .. odt .. ' ' .. xml
+  managed_terminal(to_odt)
+  local cleanup_xml = 'test -f ' .. odt .. ' && rm -f ' .. xml
+  managed_terminal(cleanup_xml)
+end
+
 -- For AsciiDoc files
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'asciidoc',
   callback = function()
-    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Make Asciidoc optimized PDF and view it' })
-    vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
+    vim.keymap.set('n', '<leader>bp', build_run_file, { desc = 'Asciidoc optimized PDF and view it' })
+    -- vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
+    vim.keymap.set('n', '<leader>bw', publish_asciidoc_web, { desc = 'Publish Asciidoc HTML (no CSS) and copy to clipboard' })
+    vim.keymap.set('n', '<leader>bo', publish_asciidoc_print, { desc = 'Asciidoc DocBook→ODT for print' })
   end,
 })
 
