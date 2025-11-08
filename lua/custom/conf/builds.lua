@@ -35,6 +35,10 @@ local function setup_bin_dir()
   return bin_dir
 end
 
+local function esc(path)
+  return vim.fn.shellescape(path)
+end
+
 -- Function to determine the file type and execute the appropriate build command
 local function build_run()
   local current_dir_name = vim.fn.fnamemodify(vim.fn.expand '%:p:h', ':t')
@@ -46,7 +50,7 @@ local function build_run()
 
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. file_path .. '/. -out:' .. bin_dir .. '/' .. current_dir_name .. '_' .. file_name
+    local command = 'odin run ' .. esc(file_path .. '/.') .. ' -out:' .. esc(bin_dir .. '/' .. current_dir_name .. '_' .. file_name)
     managed_terminal(command)
     vim.cmd 'normal! G'
   else
@@ -62,38 +66,37 @@ local function build_run_file()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. file_path .. '/' .. file_name .. '.odin -file -out:' .. bin_dir .. '/' .. file_name
+    local command = 'odin run ' .. esc(file_path .. '/' .. file_name .. '.odin') .. ' -file -out:' .. esc(bin_dir .. '/' .. file_name)
     managed_terminal(command)
     vim.cmd 'normal! G'
   elseif filetype == 'asciidoc' then
     -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
-    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf ' .. file_path .. '/' .. file_name .. '.adoc'
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme=/home/patrick/.config/nvim/lua/custom/conf/noto-serif-greek.yml -a pdf-fontsdir=/home/patrick/.config/nvim/lua/custom/conf/fonts ' .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
     -- GhostScript Optimization
     local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
-      .. file_name
-      .. '-opt.pdf '
-      .. file_name
-      .. '.pdf'
+      .. esc(file_name .. '-opt.pdf')
+      .. ' '
+      .. esc(file_name .. '.pdf')
     managed_terminal(pdf_optimizer_command)
     vim.cmd 'normal! G'
 
-    local cleanup_cmd = 'rm -f ' .. file_name .. '.pdf'
+    local cleanup_cmd = 'rm -f ' .. esc(file_name .. '.pdf')
     managed_terminal(cleanup_cmd)
     vim.cmd 'normal! G'
 
-    local open_pdf_cmd = 'xdg-open ' .. file_name .. '-opt.pdf'
+    local open_pdf_cmd = 'xdg-open ' .. esc(file_name .. '-opt.pdf')
     managed_terminal(open_pdf_cmd)
   elseif filetype == 'c' then
     local bin_path = bin_dir .. '/' .. file_name
-    local command = 'gcc -ansi ' .. file_path .. '/' .. file_name .. '.c' .. ' -o ' .. bin_dir .. '/' .. file_name
+    local command = 'gcc -ansi ' .. esc(file_path .. '/' .. file_name .. '.c') .. ' -o ' .. esc(bin_dir .. '/' .. file_name)
     managed_terminal(command)
-    managed_terminal(bin_path)
+    managed_terminal(esc(bin_path))
     vim.cmd 'normal! G'
   elseif filetype == 'ruby' then
     -- Construct the build command with output to 'bin'
-    local command = 'ruby ' .. file_path .. '/' .. file_name .. '.rb'
+    local command = 'ruby ' .. esc(file_path .. '/' .. file_name .. '.rb')
     managed_terminal(command)
     vim.cmd 'normal! G'
   else
@@ -109,9 +112,9 @@ local function test_run()
   local bin_dir = setup_bin_dir()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
-    managed_terminal('odin test . -out:' .. bin_dir .. '/' .. file_name)
+    managed_terminal('odin test . -out:' .. esc(bin_dir .. '/' .. file_name))
   elseif filetype == 'ruby' then
-    managed_terminal('cd ' .. file_path)
+    managed_terminal('cd ' .. esc(file_path))
     managed_terminal 'cd ..'
     managed_terminal 'rspec'
   else
@@ -154,7 +157,7 @@ local function test_specific_case()
   if filetype == 'odin' then
     -- Retrieve the package name and execute the test command
     get_package_name(function(package_name)
-      local command = 'odin test . -define:ODIN_TEST_NAMES=' .. package_name .. '.' .. test_name .. ' -out:' .. bin_dir .. '/' .. test_name
+      local command = 'odin test . -define:ODIN_TEST_NAMES=' .. package_name .. '.' .. test_name .. ' -out:' .. esc(bin_dir .. '/' .. test_name)
       managed_terminal(command)
     end)
   else

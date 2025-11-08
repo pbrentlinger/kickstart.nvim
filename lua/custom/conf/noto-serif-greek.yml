@@ -1,0 +1,16 @@
+# ASCIIDOCTOR THEME FOR to include GREEK letters
+extends: default
+
+font_catalog:
+  Noto Serif:
+    normal: NotoSerif-Regular.ttf
+    italic: NotoSerif-Italic.ttf
+    bold: NotoSerif-Bold.ttf
+    bold_italic: NotoSerif-BoldItalic.ttf
+
+base:
+  font_family: Noto Serif
+
+# Ensure we always fall back to the same family (full Unicode build)
+fallback_fonts:
+  - Noto Serif
