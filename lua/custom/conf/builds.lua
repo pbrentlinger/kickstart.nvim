@@ -71,7 +71,8 @@ local function build_run_file()
     vim.cmd 'normal! G'
   elseif filetype == 'asciidoc' then
     -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
-    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme=/home/patrick/.config/nvim/lua/custom/conf/noto-serif-greek.yml -a pdf-fontsdir=/home/patrick/.config/nvim/lua/custom/conf/fonts ' .. esc(file_path .. '/' .. file_name .. '.adoc')
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme=/home/patrick/.config/nvim/lua/custom/conf/noto-serif-greek.yml -a pdf-fontsdir=/home/patrick/.config/nvim/lua/custom/conf/fonts '
+      .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
     -- GhostScript Optimization
@@ -177,6 +178,24 @@ local function publish_asciidoc_web()
   vim.cmd 'normal! G'
 end
 
+local function publish_asciidoc_congregate_html()
+  local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
+  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+  local html = esc(file_path .. '/' .. file_name .. '.html')
+  local include = esc '/home/patrick/.config/nvim/lua/custom/conf/build-includes/asciidoc/congregate-css.html'
+
+  -- 1) Generate HTML without embedded CSS (no stylesheet at all)
+  local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
+  managed_terminal(html_cmd)
+  vim.cmd 'normal! G'
+
+  -- 2) Append congregate CSS HTML include to the end of the generated HTML
+  local append_cmd = '/bin/cat ' .. include .. ' >> ' .. html
+  managed_terminal(append_cmd)
+  vim.cmd 'normal! G'
+end
+
 local function publish_asciidoc_print()
   local file_name = vim.fn.expand '%:t:r'
   local file_path = vim.fn.expand '%:p:h'
@@ -198,6 +217,7 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.keymap.set('n', '<leader>bp', build_run_file, { desc = 'Asciidoc optimized PDF and view it' })
     -- vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
     vim.keymap.set('n', '<leader>bw', publish_asciidoc_web, { desc = 'Publish Asciidoc HTML (no CSS) and copy to clipboard' })
+    vim.keymap.set('n', '<leader>bc', publish_asciidoc_congregate_html, { desc = 'Publish Asciidoc HTML + congregate CSS' })
     vim.keymap.set('n', '<leader>bo', publish_asciidoc_print, { desc = 'Asciidoc DocBook→ODT for print' })
   end,
 })
