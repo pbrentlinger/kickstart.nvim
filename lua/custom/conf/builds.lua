@@ -35,6 +35,10 @@ local function setup_bin_dir()
   return bin_dir
 end
 
+local function esc(path)
+  return vim.fn.shellescape(path)
+end
+
 -- Function to determine the file type and execute the appropriate build command
 local function build_run()
   local current_dir_name = vim.fn.fnamemodify(vim.fn.expand '%:p:h', ':t')
@@ -46,7 +50,7 @@ local function build_run()
 
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. file_path .. '/. -out:' .. bin_dir .. '/' .. current_dir_name .. '_' .. file_name
+    local command = 'odin run ' .. esc(file_path .. '/.') .. ' -out:' .. esc(bin_dir .. '/' .. current_dir_name .. '_' .. file_name)
     managed_terminal(command)
     vim.cmd 'normal! G'
   else
@@ -62,38 +66,38 @@ local function build_run_file()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
     -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. file_path .. '/' .. file_name .. '.odin -file -out:' .. bin_dir .. '/' .. file_name
+    local command = 'odin run ' .. esc(file_path .. '/' .. file_name .. '.odin') .. ' -file -out:' .. esc(bin_dir .. '/' .. file_name)
     managed_terminal(command)
     vim.cmd 'normal! G'
   elseif filetype == 'asciidoc' then
     -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
-    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf ' .. file_path .. '/' .. file_name .. '.adoc'
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme=/home/patrick/.config/nvim/lua/custom/conf/noto-serif-greek.yml -a pdf-fontsdir=/home/patrick/.config/nvim/lua/custom/conf/fonts '
+      .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
     -- GhostScript Optimization
     local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
-      .. file_name
-      .. '-opt.pdf '
-      .. file_name
-      .. '.pdf'
+      .. esc(file_name .. '-opt.pdf')
+      .. ' '
+      .. esc(file_name .. '.pdf')
     managed_terminal(pdf_optimizer_command)
     vim.cmd 'normal! G'
 
-    local cleanup_cmd = 'rm -f ' .. file_name .. '.pdf'
+    local cleanup_cmd = 'rm -f ' .. esc(file_name .. '.pdf')
     managed_terminal(cleanup_cmd)
     vim.cmd 'normal! G'
 
-    local open_pdf_cmd = 'xdg-open ' .. file_name .. '-opt.pdf'
+    local open_pdf_cmd = 'xdg-open ' .. esc(file_name .. '-opt.pdf')
     managed_terminal(open_pdf_cmd)
   elseif filetype == 'c' then
     local bin_path = bin_dir .. '/' .. file_name
-    local command = 'gcc -ansi ' .. file_path .. '/' .. file_name .. '.c' .. ' -o ' .. bin_dir .. '/' .. file_name
+    local command = 'gcc -ansi ' .. esc(file_path .. '/' .. file_name .. '.c') .. ' -o ' .. esc(bin_dir .. '/' .. file_name)
     managed_terminal(command)
-    managed_terminal(bin_path)
+    managed_terminal(esc(bin_path))
     vim.cmd 'normal! G'
   elseif filetype == 'ruby' then
     -- Construct the build command with output to 'bin'
-    local command = 'ruby ' .. file_path .. '/' .. file_name .. '.rb'
+    local command = 'ruby ' .. esc(file_path .. '/' .. file_name .. '.rb')
     managed_terminal(command)
     vim.cmd 'normal! G'
   else
@@ -109,9 +113,9 @@ local function test_run()
   local bin_dir = setup_bin_dir()
   local filetype = vim.bo.filetype
   if filetype == 'odin' then
-    managed_terminal('odin test . -out:' .. bin_dir .. '/' .. file_name)
+    managed_terminal('odin test . -out:' .. esc(bin_dir .. '/' .. file_name))
   elseif filetype == 'ruby' then
-    managed_terminal('cd ' .. file_path)
+    managed_terminal('cd ' .. esc(file_path))
     managed_terminal 'cd ..'
     managed_terminal 'rspec'
   else
@@ -154,7 +158,7 @@ local function test_specific_case()
   if filetype == 'odin' then
     -- Retrieve the package name and execute the test command
     get_package_name(function(package_name)
-      local command = 'odin test . -define:ODIN_TEST_NAMES=' .. package_name .. '.' .. test_name .. ' -out:' .. bin_dir .. '/' .. test_name
+      local command = 'odin test . -define:ODIN_TEST_NAMES=' .. package_name .. '.' .. test_name .. ' -out:' .. esc(bin_dir .. '/' .. test_name)
       managed_terminal(command)
     end)
   else
@@ -162,12 +166,59 @@ local function test_specific_case()
   end
 end
 
+local function publish_asciidoc_web()
+  local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
+  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+  local html = esc(file_path .. '/' .. file_name .. '.html')
+
+  -- Generate HTML without embedded CSS (no stylesheet at all)
+  local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
+  managed_terminal(html_cmd)
+  vim.cmd 'normal! G'
+end
+
+local function publish_asciidoc_congregate_html()
+  local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
+  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+  local html = esc(file_path .. '/' .. file_name .. '.html')
+  local include = esc '/home/patrick/.config/nvim/lua/custom/conf/build-includes/asciidoc/congregate-css.html'
+
+  -- 1) Generate HTML without embedded CSS (no stylesheet at all)
+  local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
+  managed_terminal(html_cmd)
+  vim.cmd 'normal! G'
+
+  -- 2) Append congregate CSS HTML include to the end of the generated HTML
+  local append_cmd = '/bin/cat ' .. include .. ' >> ' .. html
+  managed_terminal(append_cmd)
+  vim.cmd 'normal! G'
+end
+
+local function publish_asciidoc_print()
+  local file_name = vim.fn.expand '%:t:r'
+  local file_path = vim.fn.expand '%:p:h'
+  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+  local xml = esc(file_path .. '/' .. file_name .. '.xml')
+  local odt = esc(file_path .. '/' .. file_name .. '.odt')
+  local to_docbook = 'asciidoctor -b docbook5 -o ' .. xml .. ' ' .. adoc
+  managed_terminal(to_docbook)
+  local to_odt = 'pandoc -f docbook -t odt -o ' .. odt .. ' ' .. xml
+  managed_terminal(to_odt)
+  local cleanup_xml = 'test -f ' .. odt .. ' && rm -f ' .. xml
+  managed_terminal(cleanup_xml)
+end
+
 -- For AsciiDoc files
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'asciidoc',
   callback = function()
-    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Make Asciidoc optimized PDF and view it' })
-    vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
+    vim.keymap.set('n', '<leader>bp', build_run_file, { desc = 'Asciidoc optimized PDF and view it' })
+    -- vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
+    vim.keymap.set('n', '<leader>bw', publish_asciidoc_web, { desc = 'Publish Asciidoc HTML (no CSS) and copy to clipboard' })
+    vim.keymap.set('n', '<leader>bc', publish_asciidoc_congregate_html, { desc = 'Publish Asciidoc HTML + congregate CSS' })
+    vim.keymap.set('n', '<leader>bo', publish_asciidoc_print, { desc = 'Asciidoc DocBook→ODT for print' })
   end,
 })
 
