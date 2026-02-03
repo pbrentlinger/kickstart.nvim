@@ -98,6 +98,13 @@ return {
   -- toggle undotree
   vim.api.nvim_set_keymap('n', '<leader>fu', ":lua require('undotree').toggle()<CR>", { noremap = true, silent = true, desc = '[F]lip [U]ndotree Toggle' }),
 
+  -- copy/yank current file in buffer full path, useful when telling AI what I want it to work on
+  -- yank path to clipboard y - p
+  vim.keymap.set('n', '<leader>xp', function()
+    vim.fn.setreg('+', vim.fn.expand '%:p')
+  end, { desc = 'execute command to Copy/Yank full file path' }),
+
+  ---------------------------------------------------------------------------------------
   -- LEAVE THIS AT BOTTOM AS I DON't FEEL LIKE FIGURING OUT WHY OTHERWISE IT BREAKS
   -- Neotree keymaps
   -- vim.cmd([[nnoremap \ :Neotree toggle reveal_force_cwd<cr>]]),
