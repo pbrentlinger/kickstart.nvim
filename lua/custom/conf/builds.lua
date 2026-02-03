@@ -77,17 +77,17 @@ local function build_run_file()
     vim.cmd 'normal! G'
     -- GhostScript Optimization
     local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
-      .. esc(file_name .. '-opt.pdf')
+      .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
       .. ' '
-      .. esc(file_name .. '.pdf')
+      .. esc(file_path .. '/' .. file_name .. '.pdf')
     managed_terminal(pdf_optimizer_command)
     vim.cmd 'normal! G'
 
-    local cleanup_cmd = 'rm -f ' .. esc(file_name .. '.pdf')
+    local cleanup_cmd = 'rm -f ' .. esc(file_path .. '/' .. file_name .. '.pdf')
     managed_terminal(cleanup_cmd)
     vim.cmd 'normal! G'
 
-    local open_pdf_cmd = 'xdg-open ' .. esc(file_name .. '-opt.pdf')
+    local open_pdf_cmd = 'xdg-open ' .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
     managed_terminal(open_pdf_cmd)
   elseif filetype == 'c' then
     local bin_path = bin_dir .. '/' .. file_name
