@@ -64,7 +64,7 @@ local function build_run_file()
   local file_name = vim.fn.expand '%:t:r'
   local file_path = vim.fn.expand '%:p:h'
   local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
-  -- local font_dir = vim.fn.expand home .. '/.config/nvim/lua/custom/conf/fonts'
+  local theme_file = home .. '/.config/nvim/lua/custom/conf/noto-serif-greek.yml'
   -- Ensure the 'bin' directory exists
   local bin_dir = setup_bin_dir()
   local filetype = vim.bo.filetype
@@ -76,25 +76,25 @@ local function build_run_file()
   elseif filetype == 'asciidoc' then
     -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
     local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme='
-      .. font_dir
-      .. '/noto-serif-greek.yml -a pdf-fontsdir='
-      .. font_dir
+      .. esc(theme_file)
+      .. ' -a pdf-fontsdir='
+      .. esc(font_dir)
       .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
     -- GhostScript Optimization
     local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
-      .. esc(file_name .. '-opt.pdf')
+      .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
       .. ' '
-      .. esc(file_name .. '.pdf')
+      .. esc(file_path .. '/' .. file_name .. '.pdf')
     managed_terminal(pdf_optimizer_command)
     vim.cmd 'normal! G'
 
-    local cleanup_cmd = 'rm -f ' .. esc(file_name .. '.pdf')
+    local cleanup_cmd = 'rm -f ' .. esc(file_path .. '/' .. file_name .. '.pdf')
     managed_terminal(cleanup_cmd)
     vim.cmd 'normal! G'
 
-    local open_pdf_cmd = 'xdg-open ' .. esc(file_name .. '-opt.pdf')
+    local open_pdf_cmd = 'xdg-open ' .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
     managed_terminal(open_pdf_cmd)
   elseif filetype == 'c' then
     local bin_path = bin_dir .. '/' .. file_name
