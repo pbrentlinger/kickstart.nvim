@@ -24,6 +24,7 @@ return {
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
     'mfussenegger/nvim-dap-python',
+    'suketa/nvim-dap-ruby',
   },
   config = function()
     local dap = require 'dap'
@@ -43,7 +44,10 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'ruby',
+        'lua',
       },
+      require('dap-ruby').setup(),
     }
 
     -- Basic debugging keymaps, feel free to change to your liking!
