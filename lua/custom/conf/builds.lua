@@ -1,3 +1,5 @@
+local home = os.getenv 'HOME'
+
 -- Function to find or create a terminal buffer
 local function managed_terminal(command)
   -- Check for an existing terminal buffer with an active channel
@@ -61,6 +63,8 @@ end
 local function build_run_file()
   local file_name = vim.fn.expand '%:t:r'
   local file_path = vim.fn.expand '%:p:h'
+  local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
+  local theme_file = home .. '/.config/nvim/lua/custom/conf/noto-serif-greek.yml'
   -- Ensure the 'bin' directory exists
   local bin_dir = setup_bin_dir()
   local filetype = vim.bo.filetype
@@ -71,7 +75,11 @@ local function build_run_file()
     vim.cmd 'normal! G'
   elseif filetype == 'asciidoc' then
     -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
-    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme=/home/patrick/.config/nvim/lua/custom/conf/noto-serif-greek.yml -a pdf-fontsdir=/home/patrick/.config/nvim/lua/custom/conf/fonts '
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme='
+      .. esc(theme_file)
+      .. ' -a pdf-fontsdir='
+      .. esc(font_dir)
+      .. ' '
       .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
@@ -98,6 +106,11 @@ local function build_run_file()
   elseif filetype == 'ruby' then
     -- Construct the build command with output to 'bin'
     local command = 'ruby ' .. esc(file_path .. '/' .. file_name .. '.rb')
+    managed_terminal(command)
+    vim.cmd 'normal! G'
+  elseif filetype == 'lua' then
+    -- Construct the build command with output to 'bin'
+    local command = 'lua ' .. esc(file_path .. '/' .. file_name .. '.lua')
     managed_terminal(command)
     vim.cmd 'normal! G'
   else
@@ -183,7 +196,7 @@ local function publish_asciidoc_congregate_html()
   local file_path = vim.fn.expand '%:p:h'
   local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
   local html = esc(file_path .. '/' .. file_name .. '.html')
-  local include = esc '/home/patrick/.config/nvim/lua/custom/conf/build-includes/asciidoc/congregate-css.html'
+  local include = esc(home .. '/.config/nvim/lua/custom/conf/build-includes/asciidoc/congregate-css.html')
 
   -- 1) Generate HTML without embedded CSS (no stylesheet at all)
   local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
@@ -250,4 +263,10 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'lua',
+  callback = function()
+    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build file' })
+  end,
+})
 return {}
