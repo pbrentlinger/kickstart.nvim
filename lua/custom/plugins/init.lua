@@ -80,7 +80,7 @@ else
     -- ===================================
     -- language plugins
     'phelipetls/vim-hugo', -- HUGO syntax highlighting https://github.com/phelipetls/vim-hugo
-    'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting https://github.com/mcombeau/vim-twee-sugarcube
+    -- 'mcombeau/vim-twee-sugarcube', -- tweet syntax highlighting https://github.com/mcombeau/vim-twee-sugarcube
     -- zettel plugins
     -- 'nvim-telekasten/calendar-vim',
   }
