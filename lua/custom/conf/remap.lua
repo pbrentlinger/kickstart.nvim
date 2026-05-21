@@ -104,6 +104,8 @@ return {
     vim.fn.setreg('+', vim.fn.expand '%:p')
   end, { desc = 'execute command to Copy/Yank full file path' }),
 
+  -- Normal‑mode mapping: <leader>xd inserts today's date at the cursor
+  vim.keymap.set('n', '<leader>xd', "i<C-r>=strftime('%Y-%m-%d')<CR><Esc>", { noremap = true, silent = true, desc = 'paste todays date' }),
   ---------------------------------------------------------------------------------------
   -- LEAVE THIS AT BOTTOM AS I DON't FEEL LIKE FIGURING OUT WHY OTHERWISE IT BREAKS
   -- Neotree keymaps
