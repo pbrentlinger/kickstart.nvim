@@ -2,7 +2,7 @@
 -- Active only for markdown and asciidoc.
 
 local ns = vim.api.nvim_create_namespace 'fade_current_line'
-local state = { enabled = false, overlay_id = nil, line_id = nil }
+local state = { enabled = false, overlay_id = nil, line_id = nil, original_scrolloff = nil }
 
 local function ensure_hl()
   -- Use Comment as the fade color to be colorscheme-friendly.
@@ -61,6 +61,9 @@ local function enable(buf, win)
     return
   end
   state.enabled = true
+  -- Save original scrolloff and set to large value to center cursor
+  state.original_scrolloff = vim.wo[win].scrolloff
+  vim.wo[win].scrolloff = 999
   refresh(buf, win)
 
   -- Buffer-local autocmds for responsive updates
@@ -90,19 +93,24 @@ local function enable(buf, win)
   })
 end
 
-local function disable(buf)
+local function disable(buf, win)
   if not state.enabled then
     return
   end
   state.enabled = false
   clear_all(buf)
+  -- Restore original scrolloff
+  if state.original_scrolloff ~= nil and win then
+    vim.wo[win].scrolloff = state.original_scrolloff
+    state.original_scrolloff = nil
+  end
   -- Clear this buffer’s augroup
   pcall(vim.api.nvim_del_augroup_by_name, 'FadeCurrentLine_' .. buf)
 end
 
 local function toggle(buf, win)
   if state.enabled then
-    disable(buf)
+    disable(buf, win)
   else
     enable(buf, win)
   end

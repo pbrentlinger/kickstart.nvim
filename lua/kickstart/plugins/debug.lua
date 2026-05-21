@@ -24,6 +24,7 @@ return {
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
     'mfussenegger/nvim-dap-python',
+    'jbyuki/one-small-step-for-vimkind',
     'suketa/nvim-dap-ruby',
   },
   config = function()
@@ -56,10 +57,24 @@ return {
     vim.keymap.set('n', '<F2>', dap.step_over, { desc = 'Debug: Step Over' })
     vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
     vim.keymap.set('n', '<leader>cb', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
+
     vim.keymap.set('n', '<leader>cB', function()
       dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
     end, { desc = 'Debug: Set Breakpoint' })
 
+    vim.keymap.set('n', '<leader>cl', function()
+      require('osv').launch { port = 8086 }
+    end, { desc = 'launch lua debugger', noremap = true })
+
+    vim.keymap.set('n', '<leader>cw', function()
+      local widgets = require 'dap.ui.widgets'
+      widgets.hover()
+    end, { desc = 'Debug: Hover' })
+
+    vim.keymap.set('n', '<leader>cf', function()
+      local widgets = require 'dap.ui.widgets'
+      widgets.centered_float(widgets.frames)
+    end, { desc = 'Debug: Centered Float' })
     -- Dap UI setup
     -- For more information, see |:help nvim-dap-ui|
     dapui.setup {
@@ -97,5 +112,17 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
+    local dap = require 'dap'
+    dap.configurations.lua = {
+      {
+        type = 'nlua',
+        request = 'attach',
+        name = 'Attach to running Neovim instance',
+      },
+    }
+
+    dap.adapters.nlua = function(callback, config)
+      callback { type = 'server', host = config.host or '127.0.0.1', port = config.port or 8086 }
+    end
   end,
 }

@@ -79,6 +79,7 @@ local function build_run_file()
       .. esc(theme_file)
       .. ' -a pdf-fontsdir='
       .. esc(font_dir)
+      .. ' '
       .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
