@@ -98,6 +98,35 @@ return {
   -- toggle undotree
   vim.api.nvim_set_keymap('n', '<leader>fu', ":lua require('undotree').toggle()<CR>", { noremap = true, silent = true, desc = '[F]lip [U]ndotree Toggle' }),
 
+  -- ----------------------------------------------------------------------------
+  -- PROCEEDURES we launch via our fun keybindings
+  -- ----------------------------------------------------------------------------
+
+  -- NUMBER MANIPULATIONS
+  -- _____________________________________________
+  vim.keymap.set('v', '<leader>n', vim.fn.nop, { desc = '[N]umber' }),
+  vim.keymap.set('v', '<leader>ni', vim.fn.nop, { desc = '[N]umber [I]ncrement' }),
+  vim.keymap.set('v', '<leader>nd', vim.fn.nop, { desc = '[N]umber [D]ecrement' }),
+  -- increment selected numbers by 1 where number is inside of <>
+  vim.keymap.set(
+    'v',
+    '<leader>nic',
+    ':s/\\<\\zs\\d\\+\\ze>/\\=submatch(0)+1/g<CR>',
+    { silent = true, desc = '[N]umber [I]ncrement [c]allout numbers in <> in selection' }
+  ),
+  -- decrement selected numbers by 1 where number is inside of <>
+  vim.keymap.set(
+    'v',
+    '<leader>ndc',
+    ':s/\\<\\zs\\d\\+\\ze>/\\=submatch(0)-1/g<CR>',
+    { silent = true, desc = '[N]umber [D]ecrement [c]allout numbers in <> in selection' }
+  ),
+  -- select numbers at beginning of the line and increment them by 1
+  vim.keymap.set('v', '<leader>nil', ':s/^\\s*\\zs\\d\\+/\\=submatch(0) + 1<CR>', { silent = true, desc = '[I]ncrement [L]eading numbers in selection' }),
+  -- select numbers at beginning of the line and decrement them by 1
+  vim.keymap.set('v', '<leader>ndl', ':s/^\\s*\\zs\\d\\+/\\=submatch(0) - 1<CR>', { silent = true, desc = '[D]ecrement [L]eading numbers in selection' }),
+  --
+
   -- copy/yank current file in buffer full path, useful when telling AI what I want it to work on
   -- yank path to clipboard y - p
   vim.keymap.set('n', '<leader>xp', function()
