@@ -7,6 +7,13 @@ local function leave_visual_mode()
     vim.api.nvim_feedkeys(esc, 'n', true)
 end
 
+local function feedkeys_no_remap(keys)
+    local term = vim.api.nvim_replace_termcodes(keys, true, false, true)
+    -- 'n' = normal mode, no remap
+    vim.api.nvim_feedkeys(term, 'n', false)
+end
+
+M.feedkeys_no_remap = feedkeys_no_remap
 local function get_visual_line_range()
     local line_start = vim.fn.line 'v'
     local line_end = vim.fn.line '.'
@@ -153,45 +160,35 @@ end
 
 -- Toggle 'true' <-> 'false' at the current word.
 -- If not on a bool, insert `default_bool` at cursor.
-function M.toggle_bool(default_bool)
-    default_bool = default_bool or 'true'
-
+local function toggle_bool_under_cursor()
     local bufnr = 0
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-    row = row - 1 -- 0-based for nvim_buf_get_lines
+    row = row - 1
 
     local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ''
     if line == '' then
-        -- Empty line, just insert default_bool
-        vim.api.nvim_buf_set_text(bufnr, row, col, row, col, { default_bool })
-        return
+        return false
     end
 
-    -- Word under cursor
     local cword = vim.fn.expand '<cword>'
-
-    -- If word is exactly 'true' or 'false', flip it
-    if cword == 'true' or cword == 'false' then
-        -- Find this occurrence in the line around the cursor
-        local s, e = line:find(cword, col + 1, true)
-        if not s then
-            -- Fallback: first occurrence on line
-            s, e = line:find(cword, 1, true)
-        end
-        if not s then
-            -- Couldn’t locate; insert default instead
-            vim.api.nvim_buf_set_text(bufnr, row, col, row, col, { default_bool })
-            return
-        end
-
-        local new_val = (cword == 'true') and 'false' or 'true'
-        -- s,e are 1-based; convert to 0-based cols
-        vim.api.nvim_buf_set_text(bufnr, row, s - 1, row, e, { new_val })
-        return
+    if cword ~= 'true' and cword ~= 'false' then
+        return false
     end
 
-    -- Not on 'true' or 'false' – insert default_bool
-    vim.api.nvim_buf_set_text(bufnr, row, col, row, col, { default_bool })
+    -- Find this occurrence (prefer around cursor)
+    local s, e = line:find(cword, col + 1, true)
+    if not s then
+        s, e = line:find(cword, 1, true)
+    end
+    if not s then
+        return false
+    end
+
+    local new_val = (cword == 'true') and 'false' or 'true'
+    vim.api.nvim_buf_set_text(bufnr, row, s - 1, row, e, { new_val })
+    return true
 end
+
+M.toggle_bool_under_cursor = toggle_bool_under_cursor
 
 return M

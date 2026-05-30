@@ -49,20 +49,27 @@ vim.api.nvim_create_autocmd('FileType', {
             require('custom.my_plugins.asciidoc_macros').insert_doc_meta()
         end, { desc = 'Insert AsciiDoc metadata header' })
         -- Toggle booleans in normal mode:
+        -- Normal mode: <C-a>/<C-x> toggle bool if on true/false, otherwise do default
         vim.keymap.set('n', '<C-a>', function()
-            require('custom.my_plugins.asciidoc_macros').toggle_bool 'true'
+            local ok = require('custom.my_plugins.asciidoc_macros').toggle_bool_under_cursor()
+            if not ok then
+                require('custom.my_plugins.asciidoc_macros').feedkeys_no_remap '<C-a>'
+            end
         end, {
             buffer = true,
             silent = true,
-            desc = 'Toggle bool here (default true)',
+            desc = 'Toggle bool or increment number',
         })
 
         vim.keymap.set('n', '<C-x>', function()
-            require('custom.my_plugins.asciidoc_macros').toggle_bool 'false'
+            local ok = require('custom.my_plugins.asciidoc_macros').toggle_bool_under_cursor()
+            if not ok then
+                require('custom.my_plugins.asciidoc_macros').feedkeys_no_remap '<C-x>'
+            end
         end, {
             buffer = true,
             silent = true,
-            desc = 'Toggle bool here (default false)',
+            desc = 'Toggle bool or decrement number',
         })
     end,
 })
