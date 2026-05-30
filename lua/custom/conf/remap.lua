@@ -1,3 +1,4 @@
+-- key bindings for neovim
 return {
   -- fast saves
   vim.keymap.set('i', '<C-s>', '<Esc>:w<CR>'),
