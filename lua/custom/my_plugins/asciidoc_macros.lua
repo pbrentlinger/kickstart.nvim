@@ -2,6 +2,11 @@ local M = {}
 
 local unpack = table.unpack or unpack
 
+local function leave_visual_mode()
+    local esc = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
+    vim.api.nvim_feedkeys(esc, 'n', true)
+end
+
 local function get_visual_line_range()
     local line_start = vim.fn.line 'v'
     local line_end = vim.fn.line '.'
@@ -43,6 +48,8 @@ function M.wrap_with_ifeval()
     vim.list_extend(new_lines, { footer })
 
     vim.api.nvim_buf_set_lines(bufnr, line_start - 1, line_end, false, new_lines)
+
+    leave_visual_mode()
 end
 
 function M.wrap_with_ifdef()
@@ -66,6 +73,8 @@ function M.wrap_with_ifdef()
     vim.list_extend(new_lines, { footer })
 
     vim.api.nvim_buf_set_lines(bufnr, line_start - 1, line_end, false, new_lines)
+
+    leave_visual_mode()
 end
 
 function M.wrap_with_ifndef()
@@ -89,6 +98,8 @@ function M.wrap_with_ifndef()
     vim.list_extend(new_lines, { footer })
 
     vim.api.nvim_buf_set_lines(bufnr, line_start - 1, line_end, false, new_lines)
+
+    leave_visual_mode()
 end
 
 function M.insert_doc_meta()
@@ -138,6 +149,49 @@ function M.insert_doc_meta()
 
     -- Insert at top of file (before current first line)
     vim.api.nvim_buf_set_lines(buf, 0, 0, false, header)
+end
+
+-- Toggle 'true' <-> 'false' at the current word.
+-- If not on a bool, insert `default_bool` at cursor.
+function M.toggle_bool(default_bool)
+    default_bool = default_bool or 'true'
+
+    local bufnr = 0
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    row = row - 1 -- 0-based for nvim_buf_get_lines
+
+    local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ''
+    if line == '' then
+        -- Empty line, just insert default_bool
+        vim.api.nvim_buf_set_text(bufnr, row, col, row, col, { default_bool })
+        return
+    end
+
+    -- Word under cursor
+    local cword = vim.fn.expand '<cword>'
+
+    -- If word is exactly 'true' or 'false', flip it
+    if cword == 'true' or cword == 'false' then
+        -- Find this occurrence in the line around the cursor
+        local s, e = line:find(cword, col + 1, true)
+        if not s then
+            -- Fallback: first occurrence on line
+            s, e = line:find(cword, 1, true)
+        end
+        if not s then
+            -- Couldn’t locate; insert default instead
+            vim.api.nvim_buf_set_text(bufnr, row, col, row, col, { default_bool })
+            return
+        end
+
+        local new_val = (cword == 'true') and 'false' or 'true'
+        -- s,e are 1-based; convert to 0-based cols
+        vim.api.nvim_buf_set_text(bufnr, row, s - 1, row, e, { new_val })
+        return
+    end
+
+    -- Not on 'true' or 'false' – insert default_bool
+    vim.api.nvim_buf_set_text(bufnr, row, col, row, col, { default_bool })
 end
 
 return M

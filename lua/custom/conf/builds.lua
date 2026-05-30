@@ -2,92 +2,222 @@ local home = os.getenv 'HOME'
 
 -- Function to find or create a terminal buffer
 local function managed_terminal(command)
-  -- Check for an existing terminal buffer with an active channel
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.bo[buf].buftype == 'terminal' and vim.bo[buf].channel ~= 0 then
-      for _, win in ipairs(vim.api.nvim_list_wins()) do
-        if vim.api.nvim_win_get_buf(win) == buf then
-          vim.api.nvim_set_current_win(win)
-          vim.fn.chansend(vim.bo[buf].channel, command .. '\n')
-          vim.cmd 'normal! G'
-          return
+    -- Check for an existing terminal buffer with an active channel
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.bo[buf].buftype == 'terminal' and vim.bo[buf].channel ~= 0 then
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+                if vim.api.nvim_win_get_buf(win) == buf then
+                    vim.api.nvim_set_current_win(win)
+                    vim.fn.chansend(vim.bo[buf].channel, command .. '\n')
+                    vim.cmd 'normal! G'
+                    return
+                end
+            end
+            -- Terminal not visible, open in a new split
+            vim.cmd 'botright vsplit'
+            vim.api.nvim_set_current_buf(buf)
+            vim.fn.chansend(vim.bo[buf].channel, command .. '\n')
+            vim.cmd 'normal! G'
+            return
         end
-      end
-      -- Terminal not visible, open in a new split
-      vim.cmd 'botright vsplit'
-      vim.api.nvim_set_current_buf(buf)
-      vim.fn.chansend(vim.bo[buf].channel, command .. '\n')
-      vim.cmd 'normal! G'
-      return
     end
-  end
-  -- No terminal found, create a new one
-  vim.cmd 'botright vsplit'
-  vim.cmd.term()
-  local job_id = vim.bo.channel
-  vim.fn.chansend(job_id, command .. '\n')
-  vim.cmd 'normal! G'
+    -- No terminal found, create a new one
+    vim.cmd 'botright vsplit'
+    vim.cmd.term()
+    local job_id = vim.bo.channel
+    vim.fn.chansend(job_id, command .. '\n')
+    vim.cmd 'normal! G'
 end
 
 local function setup_bin_dir()
-  local bin_dir = vim.fn.expand '%:p:h' .. '/bin'
-  if vim.fn.isdirectory(bin_dir) == 0 then
-    vim.fn.mkdir(bin_dir, 'p')
-  end
-  return bin_dir
+    local bin_dir = vim.fn.expand '%:p:h' .. '/bin'
+    if vim.fn.isdirectory(bin_dir) == 0 then
+        vim.fn.mkdir(bin_dir, 'p')
+    end
+    return bin_dir
 end
 
 local function esc(path)
-  return vim.fn.shellescape(path)
+    return vim.fn.shellescape(path)
 end
 
 -- Function to determine the file type and execute the appropriate build command
 local function build_run()
-  local current_dir_name = vim.fn.fnamemodify(vim.fn.expand '%:p:h', ':t')
-  local file_name = vim.fn.expand '%:t:r'
-  local file_path = vim.fn.expand '%:p:h'
-  -- Ensure the 'bin' directory exists
-  local bin_dir = setup_bin_dir()
-  local filetype = vim.bo.filetype
+    local current_dir_name = vim.fn.fnamemodify(vim.fn.expand '%:p:h', ':t')
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    -- Ensure the 'bin' directory exists
+    local bin_dir = setup_bin_dir()
+    local filetype = vim.bo.filetype
 
-  if filetype == 'odin' then
-    -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. esc(file_path .. '/.') .. ' -out:' .. esc(bin_dir .. '/' .. current_dir_name .. '_' .. file_name)
-    managed_terminal(command)
-    vim.cmd 'normal! G'
-  else
-    print('No build command configured for this file type: ' .. filetype)
-  end
+    if filetype == 'odin' then
+        -- Construct the build command with output to 'bin'
+        local command = 'odin run ' .. esc(file_path .. '/.') .. ' -out:' .. esc(bin_dir .. '/' .. current_dir_name .. '_' .. file_name)
+        managed_terminal(command)
+        vim.cmd 'normal! G'
+    else
+        print('No build command configured for this file type: ' .. filetype)
+    end
 end
 
 local function build_run_file()
-  local file_name = vim.fn.expand '%:t:r'
-  local file_path = vim.fn.expand '%:p:h'
-  local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
-  local theme_file = home .. '/.config/nvim/lua/custom/conf/noto-serif-greek.yml'
-  -- Ensure the 'bin' directory exists
-  local bin_dir = setup_bin_dir()
-  local filetype = vim.bo.filetype
-  if filetype == 'odin' then
-    -- Construct the build command with output to 'bin'
-    local command = 'odin run ' .. esc(file_path .. '/' .. file_name .. '.odin') .. ' -file -out:' .. esc(bin_dir .. '/' .. file_name)
-    managed_terminal(command)
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
+    local theme_file = home .. '/.config/nvim/lua/custom/conf/noto-serif-greek.yml'
+    -- Ensure the 'bin' directory exists
+    local bin_dir = setup_bin_dir()
+    local filetype = vim.bo.filetype
+    if filetype == 'odin' then
+        -- Construct the build command with output to 'bin'
+        local command = 'odin run ' .. esc(file_path .. '/' .. file_name .. '.odin') .. ' -file -out:' .. esc(bin_dir .. '/' .. file_name)
+        managed_terminal(command)
+        vim.cmd 'normal! G'
+    elseif filetype == 'c' then
+        local bin_path = bin_dir .. '/' .. file_name
+        local command = 'gcc -ansi ' .. esc(file_path .. '/' .. file_name .. '.c') .. ' -o ' .. esc(bin_dir .. '/' .. file_name)
+        managed_terminal(command)
+        managed_terminal(esc(bin_path))
+        vim.cmd 'normal! G'
+    elseif filetype == 'ruby' then
+        -- Construct the build command with output to 'bin'
+        local command = 'ruby ' .. esc(file_path .. '/' .. file_name .. '.rb')
+        managed_terminal(command)
+        vim.cmd 'normal! G'
+    elseif filetype == 'lua' then
+        -- Construct the build command with output to 'bin'
+        local command = 'lua ' .. esc(file_path .. '/' .. file_name .. '.lua')
+        managed_terminal(command)
+        vim.cmd 'normal! G'
+    else
+        print('No build command configured for this file type: ' .. filetype)
+    end
+end
+
+-- Function to determine the file type and execute the appropriate test command
+local function test_run()
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    -- Ensure the 'bin' directory exists
+    local bin_dir = setup_bin_dir()
+    local filetype = vim.bo.filetype
+    if filetype == 'odin' then
+        managed_terminal('odin test . -out:' .. esc(bin_dir .. '/' .. file_name))
+    elseif filetype == 'ruby' then
+        managed_terminal('cd ' .. esc(file_path))
+        managed_terminal 'cd ..'
+        managed_terminal 'rspec'
+    else
+        print('No test command configured for this file type: ' .. filetype)
+    end
+end
+
+-- Function to retrieve the package name using LSP
+local function get_package_name(callback)
+    local params = { textDocument = vim.lsp.util.make_text_document_params() }
+    vim.lsp.buf_request(0, 'textDocument/documentSymbol', params, function(err, _, result)
+        if err or not result then
+            print 'Error retrieving symbols'
+            return
+        end
+
+        -- Find the package symbol
+        local package_name = 'main' -- Default to 'main' if not found
+        for _, symbol in ipairs(result) do
+            if symbol.kind == 3 and symbol.name then -- 3 corresponds to 'Namespace' or similar
+                package_name = symbol.name
+                break
+            end
+        end
+        callback(package_name)
+    end)
+end
+
+-- Function to test a specific test case using LSP to get package name
+local function test_specific_case()
+    local filetype = vim.bo.filetype
+    -- Yank the word under the cursor
+    vim.cmd 'normal! yaw'
+    local test_name = vim.fn.getreg '"'
+    test_name = vim.fn.trim(test_name)
+
+    -- Ensure the 'bin' directory exists
+    local bin_dir = setup_bin_dir()
+
+    if filetype == 'odin' then
+        -- Retrieve the package name and execute the test command
+        get_package_name(function(package_name)
+            local command = 'odin test . -define:ODIN_TEST_NAMES=' .. package_name .. '.' .. test_name .. ' -out:' .. esc(bin_dir .. '/' .. test_name)
+            managed_terminal(command)
+        end)
+    else
+        print('No test command configured for this file type: ' .. filetype)
+    end
+end
+
+local function publish_asciidoc_web()
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+    local html = esc(file_path .. '/' .. file_name .. '.html')
+
+    -- Generate HTML without embedded CSS (no stylesheet at all)
+    local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
+    managed_terminal(html_cmd)
     vim.cmd 'normal! G'
-  elseif filetype == 'asciidoc' then
+end
+
+local function publish_asciidoc_congregate_html()
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+    local html = esc(file_path .. '/' .. file_name .. '.html')
+    local include = esc(home .. '/.config/nvim/lua/custom/conf/build-includes/asciidoc/congregate-css.html')
+
+    -- 1) Generate HTML without embedded CSS (no stylesheet at all)
+    local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
+    managed_terminal(html_cmd)
+    vim.cmd 'normal! G'
+
+    -- 2) Append congregate CSS HTML include to the end of the generated HTML
+    local append_cmd = '/bin/cat ' .. include .. ' >> ' .. html
+    managed_terminal(append_cmd)
+    vim.cmd 'normal! G'
+end
+
+local function publish_asciidoc_print()
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
+    local xml = esc(file_path .. '/' .. file_name .. '.xml')
+    local odt = esc(file_path .. '/' .. file_name .. '.odt')
+    local to_docbook = 'asciidoctor -b docbook5 -o ' .. xml .. ' ' .. adoc
+    managed_terminal(to_docbook)
+    local to_odt = 'pandoc -f docbook -t odt -o ' .. odt .. ' ' .. xml
+    managed_terminal(to_odt)
+    local cleanup_xml = 'test -f ' .. odt .. ' && rm -f ' .. xml
+    managed_terminal(cleanup_xml)
+end
+
+local function asciidoc_greek_pdf()
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
+    local theme_file = home .. '/.config/nvim/lua/custom/conf/noto-serif-greek.yml'
     -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
     local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme='
-      .. esc(theme_file)
-      .. ' -a pdf-fontsdir='
-      .. esc(font_dir)
-      .. ' '
-      .. esc(file_path .. '/' .. file_name .. '.adoc')
+        .. esc(theme_file)
+        .. ' -a pdf-fontsdir='
+        .. esc(font_dir)
+        .. ' '
+        .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
     -- GhostScript Optimization
     local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
-      .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
-      .. ' '
-      .. esc(file_path .. '/' .. file_name .. '.pdf')
+        .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
+        .. ' '
+        .. esc(file_path .. '/' .. file_name .. '.pdf')
     managed_terminal(pdf_optimizer_command)
     vim.cmd 'normal! G'
 
@@ -97,176 +227,73 @@ local function build_run_file()
 
     local open_pdf_cmd = 'xdg-open ' .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
     managed_terminal(open_pdf_cmd)
-  elseif filetype == 'c' then
-    local bin_path = bin_dir .. '/' .. file_name
-    local command = 'gcc -ansi ' .. esc(file_path .. '/' .. file_name .. '.c') .. ' -o ' .. esc(bin_dir .. '/' .. file_name)
-    managed_terminal(command)
-    managed_terminal(esc(bin_path))
+end
+
+local function asciidoc_pdf()
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf ' .. esc(file_path .. '/' .. file_name .. '.adoc')
+    managed_terminal(pdf_command)
     vim.cmd 'normal! G'
-  elseif filetype == 'ruby' then
-    -- Construct the build command with output to 'bin'
-    local command = 'ruby ' .. esc(file_path .. '/' .. file_name .. '.rb')
-    managed_terminal(command)
+    -- GhostScript Optimization
+    local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
+        .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
+        .. ' '
+        .. esc(file_path .. '/' .. file_name .. '.pdf')
+    managed_terminal(pdf_optimizer_command)
     vim.cmd 'normal! G'
-  elseif filetype == 'lua' then
-    -- Construct the build command with output to 'bin'
-    local command = 'lua ' .. esc(file_path .. '/' .. file_name .. '.lua')
-    managed_terminal(command)
+
+    local cleanup_cmd = 'rm -f ' .. esc(file_path .. '/' .. file_name .. '.pdf')
+    managed_terminal(cleanup_cmd)
     vim.cmd 'normal! G'
-  else
-    print('No build command configured for this file type: ' .. filetype)
-  end
+
+    local open_pdf_cmd = 'xdg-open ' .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
+    managed_terminal(open_pdf_cmd)
 end
-
--- Function to determine the file type and execute the appropriate test command
-local function test_run()
-  local file_name = vim.fn.expand '%:t:r'
-  local file_path = vim.fn.expand '%:p:h'
-  -- Ensure the 'bin' directory exists
-  local bin_dir = setup_bin_dir()
-  local filetype = vim.bo.filetype
-  if filetype == 'odin' then
-    managed_terminal('odin test . -out:' .. esc(bin_dir .. '/' .. file_name))
-  elseif filetype == 'ruby' then
-    managed_terminal('cd ' .. esc(file_path))
-    managed_terminal 'cd ..'
-    managed_terminal 'rspec'
-  else
-    print('No test command configured for this file type: ' .. filetype)
-  end
-end
-
--- Function to retrieve the package name using LSP
-local function get_package_name(callback)
-  local params = { textDocument = vim.lsp.util.make_text_document_params() }
-  vim.lsp.buf_request(0, 'textDocument/documentSymbol', params, function(err, _, result)
-    if err or not result then
-      print 'Error retrieving symbols'
-      return
-    end
-
-    -- Find the package symbol
-    local package_name = 'main' -- Default to 'main' if not found
-    for _, symbol in ipairs(result) do
-      if symbol.kind == 3 and symbol.name then -- 3 corresponds to 'Namespace' or similar
-        package_name = symbol.name
-        break
-      end
-    end
-    callback(package_name)
-  end)
-end
-
--- Function to test a specific test case using LSP to get package name
-local function test_specific_case()
-  local filetype = vim.bo.filetype
-  -- Yank the word under the cursor
-  vim.cmd 'normal! yaw'
-  local test_name = vim.fn.getreg '"'
-  test_name = vim.fn.trim(test_name)
-
-  -- Ensure the 'bin' directory exists
-  local bin_dir = setup_bin_dir()
-
-  if filetype == 'odin' then
-    -- Retrieve the package name and execute the test command
-    get_package_name(function(package_name)
-      local command = 'odin test . -define:ODIN_TEST_NAMES=' .. package_name .. '.' .. test_name .. ' -out:' .. esc(bin_dir .. '/' .. test_name)
-      managed_terminal(command)
-    end)
-  else
-    print('No test command configured for this file type: ' .. filetype)
-  end
-end
-
-local function publish_asciidoc_web()
-  local file_name = vim.fn.expand '%:t:r'
-  local file_path = vim.fn.expand '%:p:h'
-  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
-  local html = esc(file_path .. '/' .. file_name .. '.html')
-
-  -- Generate HTML without embedded CSS (no stylesheet at all)
-  local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
-  managed_terminal(html_cmd)
-  vim.cmd 'normal! G'
-end
-
-local function publish_asciidoc_congregate_html()
-  local file_name = vim.fn.expand '%:t:r'
-  local file_path = vim.fn.expand '%:p:h'
-  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
-  local html = esc(file_path .. '/' .. file_name .. '.html')
-  local include = esc(home .. '/.config/nvim/lua/custom/conf/build-includes/asciidoc/congregate-css.html')
-
-  -- 1) Generate HTML without embedded CSS (no stylesheet at all)
-  local html_cmd = 'asciidoctor -a stylesheet! -o ' .. html .. ' ' .. adoc
-  managed_terminal(html_cmd)
-  vim.cmd 'normal! G'
-
-  -- 2) Append congregate CSS HTML include to the end of the generated HTML
-  local append_cmd = '/bin/cat ' .. include .. ' >> ' .. html
-  managed_terminal(append_cmd)
-  vim.cmd 'normal! G'
-end
-
-local function publish_asciidoc_print()
-  local file_name = vim.fn.expand '%:t:r'
-  local file_path = vim.fn.expand '%:p:h'
-  local adoc = esc(file_path .. '/' .. file_name .. '.adoc')
-  local xml = esc(file_path .. '/' .. file_name .. '.xml')
-  local odt = esc(file_path .. '/' .. file_name .. '.odt')
-  local to_docbook = 'asciidoctor -b docbook5 -o ' .. xml .. ' ' .. adoc
-  managed_terminal(to_docbook)
-  local to_odt = 'pandoc -f docbook -t odt -o ' .. odt .. ' ' .. xml
-  managed_terminal(to_odt)
-  local cleanup_xml = 'test -f ' .. odt .. ' && rm -f ' .. xml
-  managed_terminal(cleanup_xml)
-end
-
 -- For AsciiDoc files
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'asciidoc',
-  callback = function()
-    vim.keymap.set('n', '<leader>bp', build_run_file, { desc = 'Asciidoc optimized PDF and view it' })
-    -- vim.keymap.set('n', '<leader>bt', ':AsciiDocPreview<CR>', { desc = 'Preview Asciidoc file' })
-    vim.keymap.set('n', '<leader>bw', publish_asciidoc_web, { desc = 'Publish Asciidoc HTML (no CSS) and copy to clipboard' })
-    vim.keymap.set('n', '<leader>bc', publish_asciidoc_congregate_html, { desc = 'Publish Asciidoc HTML + congregate CSS' })
-    vim.keymap.set('n', '<leader>bo', publish_asciidoc_print, { desc = 'Asciidoc DocBook→ODT for print' })
-  end,
+    pattern = 'asciidoc',
+    callback = function()
+        vim.keymap.set('n', '<leader>bb', asciidoc_pdf, { desc = 'Asciidoc with pdf optimized' })
+        vim.keymap.set('n', '<leader>bg', asciidoc_greek_pdf, { desc = 'Asciidoc with Greek UTF-8 pdf optimized' })
+        vim.keymap.set('n', '<leader>bw', publish_asciidoc_web, { desc = 'Publish Asciidoc HTML (no CSS) and copy to clipboard' })
+        vim.keymap.set('n', '<leader>bc', publish_asciidoc_congregate_html, { desc = 'Publish Asciidoc HTML + congregate CSS' })
+        vim.keymap.set('n', '<leader>bo', publish_asciidoc_print, { desc = 'Asciidoc DocBook→ODT for print' })
+    end,
 })
 
 -- For Odin files
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'odin',
-  callback = function()
-    vim.keymap.set('n', '<leader>br', build_run, { desc = 'Build and run project based on file type' })
-    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build file as self-contained package' })
-    vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' })
-    vim.keymap.set('n', '<leader>bs', test_specific_case, { desc = 'Test specific Odin test case' })
-  end,
+    pattern = 'odin',
+    callback = function()
+        vim.keymap.set('n', '<leader>br', build_run, { desc = 'Build and run project based on file type' })
+        vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'Build file as self-contained package' })
+        vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' })
+        vim.keymap.set('n', '<leader>bs', test_specific_case, { desc = 'Test specific Odin test case' })
+    end,
 })
 
 -- For c files
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'c',
-  callback = function()
-    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build file useing gcc -ascii' })
-  end,
+    pattern = 'c',
+    callback = function()
+        vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build file useing gcc -ascii' })
+    end,
 })
 
 -- For c files
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'ruby',
-  callback = function()
-    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build/execture ruby files' })
-    vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' })
-  end,
+    pattern = 'ruby',
+    callback = function()
+        vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build/execture ruby files' })
+        vim.keymap.set('n', '<leader>bt', test_run, { desc = 'Test project based on file type' })
+    end,
 })
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'lua',
-  callback = function()
-    vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build file' })
-  end,
+    pattern = 'lua',
+    callback = function()
+        vim.keymap.set('n', '<leader>bf', build_run_file, { desc = 'build file' })
+    end,
 })
 return {}

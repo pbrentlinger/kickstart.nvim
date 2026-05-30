@@ -1,6 +1,6 @@
 # ASCIIDOCTOR THEME FOR to include GREEK letters
 extends: default
-
+merge: true 
 font_catalog:
   Noto Serif:
     normal: NotoSerif-Regular.ttf
