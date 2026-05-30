@@ -44,6 +44,10 @@ vim.api.nvim_create_autocmd('FileType', {
             silent = true,
             desc = '[W]rap selection in if[N]def block',
         })
+        vim.keymap.set('n', '<leader>a', 'Nop', { silent = true, desc = '[A]sciiDoc...' })
+        vim.keymap.set('n', '<leader>am', function()
+            require('custom.my_plugins.asciidoc_macros').insert_doc_meta()
+        end, { desc = 'Insert AsciiDoc metadata header' })
     end,
 })
 return {}

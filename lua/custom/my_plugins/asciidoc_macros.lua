@@ -90,4 +90,54 @@ function M.wrap_with_ifndef()
 
     vim.api.nvim_buf_set_lines(bufnr, line_start - 1, line_end, false, new_lines)
 end
+
+function M.insert_doc_meta()
+    -- going to insert the following
+    -- = Title derived from the file name replacing - or _ with spaces
+    -- :author: Patrick Brentlinger
+    -- 1.0, today's date: Initial commit
+    -- :doctype: article
+    -- :experimental:
+    -- :toc: left
+
+    -- Get current buffer and filename
+    local buf = vim.api.nvim_get_current_buf()
+    local full_path = vim.api.nvim_buf_get_name(buf)
+
+    -- Extract filename without extension
+    -- :t  -> tail (filename)
+    -- :r  -> root (strip extension)
+    local base_name = vim.fn.fnamemodify(full_path, ':t:r')
+
+    if base_name == nil or base_name == '' then
+        base_name = 'Untitled'
+    end
+
+    -- Replace - and _ with spaces
+    local title = base_name:gsub('[-_]', ' ')
+
+    -- Title Case: capitalize first letter of each word
+    title = title:gsub('(%S)(%S*)', function(first, rest)
+        return first:upper() .. rest:lower()
+    end)
+
+    -- Date in YYYY-MM-DD format
+    local date = os.date '%Y-%m-%d'
+
+    -- Build header lines
+    local header = {
+        '= ' .. title,
+        ':author: Patrick Brentlinger',
+        '1.0, ' .. date .. ': Initial commit',
+        ':doctype: article',
+        ':experimental:',
+        ':icons: font',
+        ':toc: left',
+        '', -- blank line after header
+    }
+
+    -- Insert at top of file (before current first line)
+    vim.api.nvim_buf_set_lines(buf, 0, 0, false, header)
+end
+
 return M
