@@ -2,36 +2,16 @@ local M = {}
 
 local unpack = table.unpack or unpack
 
-local function leave_visual_mode()
-    local esc = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
-    vim.api.nvim_feedkeys(esc, 'n', true)
-end
+local visual = require 'custom.utils.visual'
 
-local function feedkeys_no_remap(keys)
-    local term = vim.api.nvim_replace_termcodes(keys, true, false, true)
-    -- 'n' = normal mode, no remap
-    vim.api.nvim_feedkeys(term, 'n', false)
-end
-
-M.feedkeys_no_remap = feedkeys_no_remap
-local function get_visual_line_range()
-    local line_start = vim.fn.line 'v'
-    local line_end = vim.fn.line '.'
-
-    print('start line and endline: ', line_start, line_end)
-
-    if line_start > line_end then
-        line_start, line_end = line_end, line_start
-    end
-
-    return line_start, line_end
-end
+M.feedkeys_no_remap = visual.feedkeys_no_remap
 
 local function get_visual_lines(bufnr)
+
     bufnr = bufnr or 0
-    local line_start, line_end = get_visual_line_range()
-    local lines = vim.api.nvim_buf_get_lines(bufnr, line_start - 1, line_end, false)
+    local line_start, line_end, lines = visual.get_visual_lines(bufnr)
     return line_start, line_end, lines
+
 end
 
 function M.wrap_with_ifeval()
@@ -56,7 +36,7 @@ function M.wrap_with_ifeval()
 
     vim.api.nvim_buf_set_lines(bufnr, line_start - 1, line_end, false, new_lines)
 
-    leave_visual_mode()
+    visual.leave_visual_mode()
 end
 
 function M.wrap_with_ifdef()
@@ -81,7 +61,7 @@ function M.wrap_with_ifdef()
 
     vim.api.nvim_buf_set_lines(bufnr, line_start - 1, line_end, false, new_lines)
 
-    leave_visual_mode()
+    visual.leave_visual_mode()
 end
 
 function M.wrap_with_ifndef()
@@ -106,7 +86,7 @@ function M.wrap_with_ifndef()
 
     vim.api.nvim_buf_set_lines(bufnr, line_start - 1, line_end, false, new_lines)
 
-    leave_visual_mode()
+    visual.leave_visual_mode()
 end
 
 function M.insert_doc_meta()

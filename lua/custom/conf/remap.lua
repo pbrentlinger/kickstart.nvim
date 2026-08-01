@@ -28,7 +28,7 @@ return {
     vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]]),
     vim.keymap.set('n', '<leader>Y', [["+Y]]),
 
-    vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]]),
+    vim.keymap.set({ 'n', 'v' }, '<leader><Del>', [["_d]]),
 
     -- This is going to get me cancelled
     -- vim.keymap.set('i', '<C-c>', '<Esc>'),
@@ -138,7 +138,13 @@ return {
     end, { desc = 'execute command to Copy/Yank full file path' }),
 
     -- Normal‑mode mapping: <leader>xd inserts today's date at the cursor
+    -- place holder for date menu in whichkey
     vim.keymap.set('n', '<leader>xd', "i<C-r>=strftime('%Y-%m-%d')<CR><Esc>", { noremap = true, silent = true, desc = 'paste todays date' }),
+
+    vim.keymap.set('v', '<leader>xd', '<Nop>', { noremap = true, silent = true, desc = 'date formats' }),
+    vim.keymap.set('v', '<leader>xd1', function()
+        require('custom.my_plugins.date_type_changer').format_selection_with_date()
+    end, { desc = 'Day Mon Dt' }),
 
     -- command to open current path in file explorer thunar
     vim.keymap.set(
