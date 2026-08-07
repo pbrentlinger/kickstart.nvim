@@ -1,4 +1,5 @@
 local home = os.getenv 'HOME'
+local config_root = vim.fn.stdpath 'config'
 
 -- Function to find or create a terminal buffer
 local function managed_terminal(command)
@@ -63,8 +64,6 @@ end
 local function build_run_file()
     local file_name = vim.fn.expand '%:t:r'
     local file_path = vim.fn.expand '%:p:h'
-    local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
-    local theme_file = home .. '/.config/nvim/lua/custom/conf/noto-serif-greek.yml'
     -- Ensure the 'bin' directory exists
     local bin_dir = setup_bin_dir()
     local filetype = vim.bo.filetype
@@ -232,7 +231,15 @@ end
 local function asciidoc_pdf()
     local file_name = vim.fn.expand '%:t:r'
     local file_path = vim.fn.expand '%:p:h'
-    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf ' .. esc(file_path .. '/' .. file_name .. '.adoc')
+    local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
+    local theme_file = home .. '/.config/nvim/lua/custom/conf/adoc-themes/church-pdf.yml'
+    -- asciidoctor --backend=pdf --require=asciidoctor-pdf 'report-from-wester-ny.adoc'
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme='
+        .. esc(theme_file)
+        .. ' -a pdf-fontsdir='
+        .. esc(font_dir)
+        .. ' '
+        .. esc(file_path .. '/' .. file_name .. '.adoc')
     managed_terminal(pdf_command)
     vim.cmd 'normal! G'
     -- GhostScript Optimization
@@ -250,6 +257,7 @@ local function asciidoc_pdf()
     local open_pdf_cmd = 'xdg-open ' .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
     managed_terminal(open_pdf_cmd)
 end
+
 -- For AsciiDoc files
 vim.api.nvim_create_autocmd('FileType', {
     pattern = 'asciidoc',

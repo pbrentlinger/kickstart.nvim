@@ -1,0 +1,21 @@
+extends: default
+
+font_catalog:
+  LiberationSerif:
+    normal: ../fonts/LiberationSerif-Regular.ttf
+    italic: ../fonts/LiberationSerif-Italic.ttf
+    bold: ../fonts/LiberationSerif-Bold.ttf
+    bold_italic: ../fonts/LiberationSerif-BoldItalic.ttf
+
+base:
+  font_family: LiberationSerif
+  font_size: 11
+  line_height: 1.3
+
+heading:
+  font_family: LiberationSerif
+  h1_font_size: 18
+  h2_font_size: 16
+  h3_font_size: 14
+  line_height: 1.2
+
