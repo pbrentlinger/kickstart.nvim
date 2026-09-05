@@ -2,7 +2,7 @@
 -- Active only for markdown and asciidoc.
 
 local ns = vim.api.nvim_create_namespace 'fade_current_line'
-local state = { enabled = false, overlay_id = nil, line_id = nil, original_scrolloff = nil }
+local state = { enabled = false, line_ids = {}, prev_row = nil, original_scrolloff = nil }
 
 local function ensure_hl()
   -- Use Comment as the fade color to be colorscheme-friendly.
@@ -13,16 +13,16 @@ end
 
 local function clear_all(buf)
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-  state.overlay_id = nil
-  state.line_id = nil
+  state.line_ids = {}
+  state.prev_row = nil
 end
 
-local function set_overlay(buf)
-  ensure_hl()
-  local line_count = vim.api.nvim_buf_line_count(buf)
-  -- One big faded region covering entire buffer
-  state.overlay_id = vim.api.nvim_buf_set_extmark(buf, ns, 0, 0, {
-    end_row = line_count, -- end_row is exclusive
+local function fade_line(buf, row)
+  if state.line_ids[row] then
+    return
+  end
+  state.line_ids[row] = vim.api.nvim_buf_set_extmark(buf, ns, row, 0, {
+    end_row = row + 1,
     end_col = 0,
     hl_group = 'LineFade',
     hl_eol = true,
@@ -31,29 +31,38 @@ local function set_overlay(buf)
   })
 end
 
-local function set_current_line(buf, win)
-  local row = (vim.api.nvim_win_get_cursor(win)[1] or 1) - 1
-  if state.line_id then
-    pcall(vim.api.nvim_buf_del_extmark, buf, ns, state.line_id)
+local function unfade_line(buf, row)
+  local id = state.line_ids[row]
+  if id then
+    pcall(vim.api.nvim_buf_del_extmark, buf, ns, id)
+    state.line_ids[row] = nil
   end
-  -- Replace fade on the current line with Normal
-  state.line_id = vim.api.nvim_buf_set_extmark(buf, ns, row, 0, {
-    end_row = row + 1,
-    end_col = 0,
-    hl_group = 'Normal',
-    hl_eol = true,
-    hl_mode = 'replace',
-    priority = 200,
-  })
+end
+
+local function set_current_line(buf, win)
+  ensure_hl()
+  local row = (vim.api.nvim_win_get_cursor(win)[1] or 1) - 1
+  if state.prev_row ~= nil and state.prev_row ~= row then
+    fade_line(buf, state.prev_row)
+  end
+  unfade_line(buf, row)
+  state.prev_row = row
 end
 
 local function refresh(buf, win)
   if not state.enabled then
     return
   end
+  ensure_hl()
   clear_all(buf)
-  set_overlay(buf)
-  set_current_line(buf, win)
+  local line_count = vim.api.nvim_buf_line_count(buf)
+  local row = (vim.api.nvim_win_get_cursor(win)[1] or 1) - 1
+  for r = 0, line_count - 1 do
+    if r ~= row then
+      fade_line(buf, r)
+    end
+  end
+  state.prev_row = row
 end
 
 local function enable(buf, win)
