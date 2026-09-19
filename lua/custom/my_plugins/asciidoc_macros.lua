@@ -138,6 +138,85 @@ function M.insert_doc_meta()
     vim.api.nvim_buf_set_lines(buf, 0, 0, false, header)
 end
 
+local function split_headers(input)
+    local headers = {}
+    for header in input:gmatch '[^,]+' do
+        header = vim.trim(header)
+        if header ~= '' then
+            table.insert(headers, header)
+        end
+    end
+    return headers
+end
+
+function M.insert_table()
+    local headers = split_headers(vim.fn.input 'Column headers (comma-separated): ')
+    if #headers == 0 then
+        vim.notify('At least one column header is required', vim.log.levels.WARN)
+        return
+    end
+
+    local body_rows = tonumber(vim.fn.input('Body rows (default: 1): ', '1'))
+    if not body_rows or body_rows < 0 or body_rows % 1 ~= 0 then
+        vim.notify('Body rows must be a non-negative integer', vim.log.levels.WARN)
+        return
+    end
+
+    local caption = vim.trim(vim.fn.input 'Caption (optional): ')
+    local include_header = vim.fn.input('Use header row? [Y/n]: ', 'y'):lower() ~= 'n'
+    local widths = vim.trim(vim.fn.input 'Column widths (optional, e.g. 1,2,1): ')
+    local extra_attributes = vim.trim(vim.fn.input 'Additional attributes (optional): ')
+    local attributes = {}
+
+    if widths ~= '' then
+        table.insert(attributes, ('cols="%s"'):format(widths))
+    end
+    if include_header then
+        table.insert(attributes, 'options="header"')
+    end
+    if extra_attributes ~= '' then
+        table.insert(attributes, extra_attributes)
+    end
+
+    local lines = {}
+    if caption ~= '' then
+        table.insert(lines, '.' .. caption)
+    end
+    if #attributes > 0 then
+        table.insert(lines, '[' .. table.concat(attributes, ',') .. ']')
+    end
+    table.insert(lines, '|===')
+
+    if include_header then
+        for _, header in ipairs(headers) do
+            table.insert(lines, '| ' .. header)
+        end
+        table.insert(lines, '')
+    end
+
+    local first_body_line
+    for row = 1, body_rows do
+        table.insert(lines, ('// Row %d'):format(row))
+        first_body_line = first_body_line or #lines + 1
+        for _ = 1, #headers do
+            table.insert(lines, '| ')
+        end
+        if row < body_rows then
+            table.insert(lines, '')
+        end
+    end
+
+    table.insert(lines, '|===')
+
+    local bufnr = vim.api.nvim_get_current_buf()
+    local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
+    vim.api.nvim_buf_set_lines(bufnr, cursor_row, cursor_row, false, lines)
+    if body_rows > 0 then
+        vim.api.nvim_win_set_cursor(0, { cursor_row + first_body_line, 2 })
+        vim.cmd 'startinsert'
+    end
+end
+
 -- Toggle 'true' <-> 'false' at the current word.
 -- If not on a bool, insert `default_bool` at cursor.
 local function toggle_bool_under_cursor()

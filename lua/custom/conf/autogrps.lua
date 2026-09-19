@@ -48,6 +48,9 @@ vim.api.nvim_create_autocmd('FileType', {
         vim.keymap.set('n', '<leader>am', function()
             require('custom.my_plugins.asciidoc_macros').insert_doc_meta()
         end, { desc = 'Insert AsciiDoc metadata header' })
+        vim.keymap.set('n', '<leader>at', function()
+            require('custom.my_plugins.asciidoc_macros').insert_table()
+        end, { buffer = true, desc = 'Insert AsciiDoc table' })
         -- Toggle booleans in normal mode:
         -- Normal mode: <C-a>/<C-x> toggle bool if on true/false, otherwise do default
         vim.keymap.set('n', '<C-a>', function()
