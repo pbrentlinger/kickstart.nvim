@@ -12,6 +12,24 @@ vim.api.nvim_create_autocmd('FileType', {
     end,
 })
 
+-- vim.api.nvim_create_autocmd('BufEnter', { -- Better highlights
+--     command = 'syntax sync fromstart',
+--     pattern = { '*.ly', '*.ily', '*.tex', '*.texi', '*.texinfo' },
+-- })
+
+-- Better syntax sync for lilypond and friends
+vim.api.nvim_create_autocmd('BufEnter', {
+    command = 'syntax sync fromstart',
+    pattern = { '*.ly', '*.ily', '*.tex', '*.texi', '*.texinfo' },
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = { 'lilypond', 'ily', 'tex', 'texi', 'texinfo' },
+    callback = function()
+        vim.keymap.set('n', '<leader>a', 'Nop', { silent = true, desc = '[A] Lilypond...' })
+    end,
+})
+
 vim.api.nvim_create_autocmd('FileType', {
     pattern = { 'asciidoctor', 'asciidoc', 'adoc' },
     callback = function()

@@ -7,11 +7,9 @@ local visual = require 'custom.utils.visual'
 M.feedkeys_no_remap = visual.feedkeys_no_remap
 
 local function get_visual_lines(bufnr)
-
     bufnr = bufnr or 0
     local line_start, line_end, lines = visual.get_visual_lines(bufnr)
     return line_start, line_end, lines
-
 end
 
 function M.wrap_with_ifeval()

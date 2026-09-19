@@ -258,11 +258,56 @@ local function asciidoc_pdf()
     managed_terminal(open_pdf_cmd)
 end
 
+local function asciidoc_pdf_booklet()
+    local file_name = vim.fn.expand '%:t:r'
+    local file_path = vim.fn.expand '%:p:h'
+    local font_dir = home .. '/.config/nvim/lua/custom/conf/fonts'
+    local theme_file = home .. '/.config/nvim/lua/custom/conf/adoc-themes/church-pdf.yml'
+
+    -- Generate PDF
+    local pdf_command = 'asciidoctor --backend=pdf --require=asciidoctor-pdf -a pdf-theme='
+        .. esc(theme_file)
+        .. ' -a pdf-fontsdir='
+        .. esc(font_dir)
+        .. ' '
+        .. esc(file_path .. '/' .. file_name .. '.adoc')
+    managed_terminal(pdf_command)
+    vim.cmd 'normal! G'
+
+    -- Optimize with GhostScript
+    local pdf_optimizer_command = 'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='
+        .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
+        .. ' '
+        .. esc(file_path .. '/' .. file_name .. '.pdf')
+    managed_terminal(pdf_optimizer_command)
+    vim.cmd 'normal! G'
+
+    -- Impose as booklet (reorders + 2-up)
+    local booklet_cmd = 'pdfbook2 --paper=letterpaper --short-edge --no-crop ' .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
+    managed_terminal(booklet_cmd)
+    vim.cmd 'normal! G'
+
+    -- pdfbook2 produces input-book.pdf; rename it to a clean name
+    local rename_cmd = 'mv -f ' .. esc(file_path .. '/' .. file_name .. '-opt-book.pdf') .. ' ' .. esc(file_path .. '/' .. file_name .. '-booklet.pdf')
+    managed_terminal(rename_cmd)
+    vim.cmd 'normal! G'
+
+    -- Cleanup intermediate files
+    local cleanup_cmd = 'rm -f ' .. esc(file_path .. '/' .. file_name .. '.pdf') .. ' ' .. esc(file_path .. '/' .. file_name .. '-opt.pdf')
+    managed_terminal(cleanup_cmd)
+    vim.cmd 'normal! G'
+
+    -- Open result
+    local open_pdf_cmd = 'xdg-open ' .. esc(file_path .. '/' .. file_name .. '-booklet.pdf')
+    managed_terminal(open_pdf_cmd)
+end
+
 -- For AsciiDoc files
 vim.api.nvim_create_autocmd('FileType', {
     pattern = 'asciidoc',
     callback = function()
         vim.keymap.set('n', '<leader>bb', asciidoc_pdf, { desc = 'Asciidoc with pdf optimized' })
+        vim.keymap.set('n', '<leader>bB', asciidoc_pdf_booklet, { desc = 'Asciidoc PDF booklet' })
         vim.keymap.set('n', '<leader>bg', asciidoc_greek_pdf, { desc = 'Asciidoc with Greek UTF-8 pdf optimized' })
         vim.keymap.set('n', '<leader>bw', publish_asciidoc_web, { desc = 'Publish Asciidoc HTML (no CSS) and copy to clipboard' })
         vim.keymap.set('n', '<leader>bc', publish_asciidoc_congregate_html, { desc = 'Publish Asciidoc HTML + congregate CSS' })
