@@ -215,6 +215,227 @@ function M.insert_table()
     end
 end
 
+local function display_width(s)
+    return vim.fn.strdisplaywidth(s)
+end
+
+local function pad_to_width(s, width)
+    local w = display_width(s)
+    if w < width then
+        return s .. string.rep(' ', width - w)
+    end
+    return s
+end
+
+local function parse_row_line(line)
+    -- Parse one or more table cells from a line, preserving optional cell
+    -- prefixes such as `a|`, `l|`, `.2+|`, `2*|`, `^|`, etc.
+    -- Returns a list of { prefix, content } tables, or nil if not a cell line.
+    local specifier = '[0-9a-zA-Z.<^>+*]*'
+    local cells = {}
+    local pos = 1
+    local len = #line
+    while pos <= len do
+        local s, e, prefix = line:find('^%s*(' .. specifier .. ')|', pos)
+        if not s then
+            break
+        end
+        pos = e + 1
+        -- Content runs until the next cell boundary (whitespace + prefix + |).
+        local ns = line:find('%s+(' .. specifier .. ')|', pos)
+        local content
+        if ns then
+            content = line:sub(pos, ns - 1)
+            pos = ns
+        else
+            content = line:sub(pos, len)
+            pos = len + 1
+        end
+        table.insert(cells, { prefix = prefix, content = vim.trim(content) })
+    end
+    return #cells > 0 and cells or nil
+end
+
+local function compact_stacked_cells(lines)
+    -- Parse stacked single-cell lines and existing compact rows into rows.
+    local items = {}
+    local pending = {}
+    local pending_indent = ''
+
+    local function flush_pending()
+        if #pending > 0 then
+            table.insert(items, { kind = 'row', indent = pending_indent, cells = pending })
+            pending = {}
+        end
+    end
+
+    for _, line in ipairs(lines) do
+        local indent = line:match '^(%s*)'
+        local cells = parse_row_line(line)
+        if not cells then
+            flush_pending()
+            table.insert(items, { kind = 'separator', line = line })
+        elseif #cells > 1 then
+            flush_pending()
+            table.insert(items, { kind = 'row', indent = indent, cells = cells })
+        else
+            if #pending == 0 then
+                pending_indent = indent
+            end
+            table.insert(pending, cells[1])
+        end
+    end
+    flush_pending()
+
+    -- Compute per-column display widths per prefix signature so rows with the
+    -- same cell prefixes align with each other (e.g. header rows vs. `a|` body rows).
+    local function signature(cells)
+        local parts = {}
+        for _, cell in ipairs(cells) do
+            table.insert(parts, cell.prefix)
+        end
+        return table.concat(parts, '\0')
+    end
+
+    local widths_by_sig = {}
+    for _, item in ipairs(items) do
+        if item.kind == 'row' then
+            local sig = signature(item.cells)
+            local widths = widths_by_sig[sig] or {}
+            for col, cell in ipairs(item.cells) do
+                widths[col] = math.max(widths[col] or 0, display_width(cell.content))
+            end
+            widths_by_sig[sig] = widths
+        end
+    end
+
+    -- Rebuild as aligned horizontal rows, dropping blank lines between rows.
+    local compacted = {}
+    local in_row_group = false
+    for _, item in ipairs(items) do
+        if item.kind == 'row' then
+            in_row_group = true
+            local widths = widths_by_sig[signature(item.cells)] or {}
+            local row = item.indent
+            for col, cell in ipairs(item.cells) do
+                if col > 1 then
+                    row = row .. ' '
+                end
+                row = row .. cell.prefix .. '| ' .. pad_to_width(cell.content, widths[col])
+            end
+            row = row:gsub('%s+$', '')
+            table.insert(compacted, row)
+        else
+            local blank = vim.trim(item.line) == ''
+            if in_row_group and blank then
+                -- Skip blank spacing between horizontal rows.
+            else
+                table.insert(compacted, item.line)
+                if not blank then
+                    in_row_group = false
+                end
+            end
+        end
+    end
+
+    return compacted
+end
+
+local function stack_compact_cells(lines)
+    -- Infer the number of columns from any multi-cell row so we can group
+    -- stacked single-cell lines into proper rows.
+    local num_cols = 1
+    for _, line in ipairs(lines) do
+        local cells = parse_row_line(line)
+        if cells and #cells > num_cols then
+            num_cols = #cells
+        end
+    end
+
+    local stacked = {}
+    local pending = {}
+    local pending_indent = ''
+    local needs_blank = false
+
+    local function flush_pending()
+        if #pending == 0 then
+            return
+        end
+        if needs_blank then
+            table.insert(stacked, '')
+        end
+        for _, cell in ipairs(pending) do
+            table.insert(stacked, pending_indent .. cell.prefix .. '| ' .. cell.content)
+        end
+        pending = {}
+        needs_blank = true
+    end
+
+    for _, line in ipairs(lines) do
+        local indent = line:match '^(%s*)'
+        local cells = parse_row_line(line)
+        if not cells then
+            flush_pending()
+            table.insert(stacked, line)
+            needs_blank = false
+        elseif #cells > 1 then
+            flush_pending()
+            if needs_blank then
+                table.insert(stacked, '')
+            end
+            for _, cell in ipairs(cells) do
+                table.insert(stacked, indent .. cell.prefix .. '| ' .. cell.content)
+            end
+            needs_blank = true
+        else
+            if #pending == 0 then
+                pending_indent = indent
+            end
+            table.insert(pending, cells[1])
+            if #pending == num_cols then
+                flush_pending()
+            end
+        end
+    end
+    flush_pending()
+
+    return stacked
+end
+
+function M.toggle_table_row_layout()
+    local bufnr = vim.api.nvim_get_current_buf()
+    local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
+    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    local delimiters = {}
+
+    for row, line in ipairs(lines) do
+        if vim.trim(line) == '|===' then
+            table.insert(delimiters, row)
+        end
+    end
+
+    local table_start, table_end
+    for index = 1, #delimiters - 1 do
+        if cursor_row >= delimiters[index] and cursor_row <= delimiters[index + 1] then
+            table_start = delimiters[index]
+            table_end = delimiters[index + 1]
+            break
+        end
+    end
+
+    if not table_start then
+        vim.notify('Cursor is not inside an AsciiDoc table', vim.log.levels.WARN)
+        return
+    end
+
+    local table_lines = vim.api.nvim_buf_get_lines(bufnr, table_start, table_end - 1, false)
+    local has_compact_rows = vim.iter(table_lines):any(function(line)
+        return line:match '^%s*[0-9a-zA-Z.<^>+*]*|.*|' ~= nil
+    end)
+    local formatted = has_compact_rows and stack_compact_cells(table_lines) or compact_stacked_cells(table_lines)
+    vim.api.nvim_buf_set_lines(bufnr, table_start, table_end - 1, false, formatted)
+end
+
 -- Toggle 'true' <-> 'false' at the current word.
 -- If not on a bool, insert `default_bool` at cursor.
 local function toggle_bool_under_cursor()
@@ -247,5 +468,35 @@ local function toggle_bool_under_cursor()
 end
 
 M.toggle_bool_under_cursor = toggle_bool_under_cursor
+
+function M.follow_include()
+    local bufnr = 0
+    local row = vim.api.nvim_win_get_cursor(0)[1]
+    local line = vim.api.nvim_buf_get_lines(bufnr, row - 1, row, false)[1] or ''
+
+    -- include::path/to/file.adoc[leveloffset=+1]
+    local target = line:match('^%s*include::([^%[]+)%[.*%]%s*$')
+    if not target or vim.trim(target) == '' then
+        vim.notify('Cursor is not on an include:: directive', vim.log.levels.WARN)
+        return
+    end
+
+    target = vim.trim(target)
+
+    -- Resolve relative paths against the current buffer's directory
+    if not target:match('^/') then
+        local dir = vim.fn.expand '%:p:h'
+        target = dir .. '/' .. target
+    end
+
+    target = vim.fn.fnamemodify(target, ':p')
+
+    if vim.fn.filereadable(target) == 0 then
+        vim.notify('Include target not readable: ' .. target, vim.log.levels.ERROR)
+        return
+    end
+
+    vim.cmd('edit ' .. vim.fn.fnameescape(target))
+end
 
 return M

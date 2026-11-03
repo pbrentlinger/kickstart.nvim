@@ -69,6 +69,12 @@ vim.api.nvim_create_autocmd('FileType', {
         vim.keymap.set('n', '<leader>at', function()
             require('custom.my_plugins.asciidoc_macros').insert_table()
         end, { buffer = true, desc = 'Insert AsciiDoc table' })
+        vim.keymap.set('n', '<leader>ar', function()
+            require('custom.my_plugins.asciidoc_macros').toggle_table_row_layout()
+        end, { buffer = true, desc = 'Toggle AsciiDoc table row layout' })
+        vim.keymap.set('n', '<leader>af', function()
+            require('custom.my_plugins.asciidoc_macros').follow_include()
+        end, { buffer = true, desc = '[F]ollow include:: directive' })
         -- Toggle booleans in normal mode:
         -- Normal mode: <C-a>/<C-x> toggle bool if on true/false, otherwise do default
         vim.keymap.set('n', '<C-a>', function()
